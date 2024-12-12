@@ -54,7 +54,6 @@ jobs:
 
       - name: Deploy to DigitalOcean Kubernetes
         run: |
-          kubectl apply -f k8s/namespace.yaml
           kubectl apply -f k8s/backend/deployment.yaml -n custom-otel-app
           kubectl apply -f k8s/frontend/deployment.yaml -n custom-otel-app
           kubectl apply -f k8s/load-generator/deployment.yaml -n custom-otel-app
