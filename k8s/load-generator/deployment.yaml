@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: load-generator
+  namespace: custom-otel-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: load-generator
+  template:
+    metadata:
+      labels:
+        app: load-generator
+    spec:
+      imagePullSecrets:
+        - name: registry-otel-demo
+      containers:
+        - name: load-generator
+          image: registry.digitalocean.com/otel-demo/opentelemetry-demo-load-generator:latest
+          imagePullPolicy: Always
+          env:
+            - name: API_URL
+              value: "http://backend"
+            - name: INTERVAL_MS
+              value: "1000"

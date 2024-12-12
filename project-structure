@@ -1,0 +1,23 @@
+opentelemetry-demo/
+├── backend/
+│   ├── src/
+│   │   ├── controllers/
+│   │   ├── models/
+│   │   ├── routes/
+│   │   ├── config/
+│   │   └── app.js
+│   ├── Dockerfile
+│   └── package.json
+├── frontend/
+│   ├── src/
+│   ├── Dockerfile
+│   └── package.json
+├── load-generator/
+│   ├── src/
+│   ├── Dockerfile
+│   └── package.json
+└── k8s/
+    ├── backend/
+    ├── frontend/
+    ├── database/
+    └── load-generator/ 

@@ -1,0 +1,10 @@
+apiVersion: v1
+data:
+  .dockerconfigjson: eyJhdXRocyI6eyJyZWdpc3RyeS5kaWdpdGFsb2NlYW4uY29tIjp7ImF1dGgiOiJZVzVoYzIxcGJHaGxiVEU1T1RkQVoyMWhhV3d1WTI5dE9tUnZjRjkyTVY4ek5qaGpNRFE0WXpnelpUQTVOekUyWVRneU5URXdPVEE1TkRBMU1tVXlNVFJtTVdKbE5XVXlZakJqWVRSa056TmpNMlV6WW1ZMk1UTTBNVEF4WWpNMSJ9fX0=
+kind: Secret
+metadata:
+  annotations:
+    digitalocean.com/dosecret-identifier: registry-otel-demo
+  name: registry-otel-demo
+  namespace: custom-otel-app
+type: kubernetes.io/dockerconfigjson

@@ -1,0 +1,66 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches: [main] # or your default branch
+  pull_request:
+    branches: [main]
+
+env:
+  REGISTRY: "registry.digitalocean.com/otel-demo"
+  CLUSTER_NAME: "k8s-1-31-1-do-4-nyc1-1732046844928"
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+
+      - name: Log in to DO Container Registry
+        run: doctl registry login --expiry-seconds 600
+
+      - name: Build backend image
+        working-directory: ./backend
+        run: |
+          docker build -t ${{ env.REGISTRY }}/opentelemetry-demo-backend:${GITHUB_SHA::7} .
+          docker push ${{ env.REGISTRY }}/opentelemetry-demo-backend:${GITHUB_SHA::7}
+
+      - name: Build frontend image
+        working-directory: ./frontend
+        run: |
+          docker build -t ${{ env.REGISTRY }}/opentelemetry-demo-frontend:${GITHUB_SHA::7} .
+          docker push ${{ env.REGISTRY }}/opentelemetry-demo-frontend:${GITHUB_SHA::7}
+
+      - name: Build load-generator image
+        working-directory: ./load-generator
+        run: |
+          docker build -t ${{ env.REGISTRY }}/opentelemetry-demo-load-generator:${GITHUB_SHA::7} .
+          docker push ${{ env.REGISTRY }}/opentelemetry-demo-load-generator:${GITHUB_SHA::7}
+
+      - name: Update deployment files
+        run: |
+          sed -i 's|image: registry.digitalocean.com/.*opentelemetry-demo-backend:.*|image: ${{ env.REGISTRY }}/opentelemetry-demo-backend:${GITHUB_SHA::7}|' k8s/backend/deployment.yaml
+          sed -i 's|image: registry.digitalocean.com/.*opentelemetry-demo-frontend:.*|image: ${{ env.REGISTRY }}/opentelemetry-demo-frontend:${GITHUB_SHA::7}|' k8s/frontend/deployment.yaml
+          sed -i 's|image: registry.digitalocean.com/.*opentelemetry-demo-load-generator:.*|image: ${{ env.REGISTRY }}/opentelemetry-demo-load-generator:${GITHUB_SHA::7}|' k8s/load-generator/deployment.yaml
+
+      - name: Save DigitalOcean kubeconfig
+        run: doctl kubernetes cluster kubeconfig save ${{ env.CLUSTER_NAME }}
+
+      - name: Deploy to DigitalOcean Kubernetes
+        run: |
+          kubectl apply -f k8s/namespace.yaml
+          kubectl apply -f k8s/backend/deployment.yaml -n custom-otel-app
+          kubectl apply -f k8s/frontend/deployment.yaml -n custom-otel-app
+          kubectl apply -f k8s/load-generator/deployment.yaml -n custom-otel-app
+
+      - name: Verify deployment
+        run: |
+          kubectl rollout status deployment/backend -n custom-otel-app
+          kubectl rollout status deployment/frontend -n custom-otel-app
+          kubectl rollout status deployment/load-generator -n custom-otel-app
