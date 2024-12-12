@@ -35,8 +35,7 @@ spec:
             - containerPort: 3000
           volumeMounts:
             - name: sqlite-data
-              mountPath: /app/database.sqlite
-              subPath: database.sqlite
+              mountPath: /app/data
       volumes:
         - name: sqlite-data
           persistentVolumeClaim:

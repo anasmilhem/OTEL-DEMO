@@ -11,8 +11,8 @@ RUN npm install
 
 COPY . .
 
-# Create an empty SQLite database file with proper permissions
-RUN touch database.sqlite && chmod 666 database.sqlite
+# Create data directory and SQLite database file with proper permissions
+RUN mkdir data && touch data/database.sqlite && chmod 777 data data/database.sqlite
 
 EXPOSE 3000
 
