@@ -74,14 +74,32 @@ function App() {
                         <ProductForm onProductCreated={fetchProducts} />
                     </div>
 
-                    <div className="mb-4">
-                        <input
-                            type="text"
-                            placeholder="Search products..."
-                            className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                            value={filters.search}
-                            onChange={(e) => handleSearch(e.target.value)}
-                        />
+                    <div className="mb-6">
+                        <div className="relative">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
+                                </svg>
+                            </div>
+                            <input
+                                type="text"
+                                placeholder="Search products by name or description..."
+                                className="pl-10 pr-4 py-2 border border-gray-300 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm rounded-md"
+                                value={filters.search}
+                                onChange={(e) => handleSearch(e.target.value)}
+                            />
+                        </div>
+                        {filters.search && (
+                            <div className="mt-2 text-sm text-gray-500">
+                                Searching for "{filters.search}"
+                                <button
+                                    onClick={() => handleSearch('')}
+                                    className="ml-2 text-indigo-600 hover:text-indigo-800"
+                                >
+                                    Clear
+                                </button>
+                            </div>
+                        )}
                     </div>
 
                     {error && (
@@ -91,7 +109,9 @@ function App() {
                     )}
 
                     {isLoading ? (
-                        <div className="text-center">Loading...</div>
+                        <div className="flex justify-center items-center py-8">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+                        </div>
                     ) : (
                         <ProductTable
                             products={productsData.products}

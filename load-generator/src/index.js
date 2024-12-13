@@ -2,10 +2,12 @@ const axios = require('axios');
 const faker = require('faker');
 
 const API_URL = process.env.API_URL || 'http://localhost:3000';
-const INTERVAL_MS = parseInt(process.env.INTERVAL_MS) || 1000;
+const INTERVAL_MS = parseInt(process.env.INTERVAL_MS) || 10000;
 
 async function generateLoad() {
     try {
+        if (Math.random() > 0.2) return;
+
         const product = {
             name: faker.commerce.productName(),
             description: faker.commerce.productDescription(),
