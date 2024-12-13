@@ -27,12 +27,29 @@ spec:
     spec:
       imagePullSecrets:
         - name: registry-otel-demo
+      initContainers:
+        - name: init-sqlite
+          image: busybox
+          command:
+            [
+              "sh",
+              "-c",
+              "mkdir -p /app/data && touch /app/data/database.sqlite && chmod -R 777 /app/data",
+            ]
+          volumeMounts:
+            - name: sqlite-data
+              mountPath: /app/data
       containers:
         - name: backend
           image: registry.digitalocean.com/otel-demo/opentelemetry-demo-backend:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 3000
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: PORT
+              value: "3000"
           volumeMounts:
             - name: sqlite-data
               mountPath: /app/data
