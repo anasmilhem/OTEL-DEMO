@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const connectDB = require('./config/database');
+const initializeDb = require('./config/initDb');
 const productRoutes = require('./routes/product');
 
 const app = express();
@@ -8,7 +9,7 @@ const PORT = process.env.PORT || 3000;
 
 // CORS configuration
 app.use(cors({
-    origin: '*',  // In production, you should specify your frontend URL
+    origin: '*',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
@@ -16,8 +17,12 @@ app.use(cors({
 // Middleware
 app.use(express.json());
 
-// Connect to MongoDB
-connectDB();
+// Connect to MongoDB and initialize data
+const startup = async () => {
+    await connectDB();
+    await initializeDb();
+};
+startup();
 
 // Routes
 app.use('/api/products', productRoutes);

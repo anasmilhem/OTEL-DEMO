@@ -10,7 +10,7 @@ const ProductList: React.FC<ProductListProps> = ({ products }) => {
         <div className="bg-white shadow overflow-hidden sm:rounded-md">
             <ul className="divide-y divide-gray-200">
                 {products.map((product) => (
-                    <li key={product.id}>
+                    <li key={product._id}>
                         <div className="px-4 py-4 sm:px-6">
                             <div className="flex items-center justify-between">
                                 <h3 className="text-lg font-medium text-gray-900">{product.name}</h3>
