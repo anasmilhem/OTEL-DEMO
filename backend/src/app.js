@@ -1,3 +1,4 @@
+const { logger } = require('./config/logger');
 const express = require('express');
 const cors = require('cors');
 const connectDB = require('./config/database');
@@ -6,6 +7,16 @@ const productRoutes = require('./routes/product');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Add logging middleware
+app.use((req, res, next) => {
+    logger.info('Incoming request', {
+        path: req.path,
+        method: req.method,
+        userAgent: req.headers['user-agent']
+    });
+    next();
+});
 
 // CORS configuration
 app.use(cors({
@@ -19,8 +30,20 @@ app.use(express.json());
 
 // Connect to MongoDB and initialize data
 const startup = async () => {
-    await connectDB();
-    await initializeDb();
+    try {
+        await connectDB();
+        await initializeDb();
+        logger.info('Application started successfully', {
+            port: PORT,
+            environment: process.env.NODE_ENV || 'development'
+        });
+    } catch (error) {
+        logger.error('Application startup failed', {
+            error: error.message,
+            stack: error.stack
+        });
+        process.exit(1);
+    }
 };
 startup();
 

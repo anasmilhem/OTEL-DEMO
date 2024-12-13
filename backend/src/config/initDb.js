@@ -1,4 +1,5 @@
 const Product = require('../models/product');
+const { logger } = require('./logger');
 
 const initialProducts = [
     {
@@ -28,10 +29,13 @@ const initializeDb = async () => {
         const count = await Product.countDocuments();
         if (count === 0) {
             await Product.insertMany(initialProducts);
-            console.log('Database initialized with default products');
+            logger.info('Database initialized with default products');
         }
     } catch (error) {
-        console.error('Error initializing database:', error);
+        logger.error('Error initializing database', {
+            error: error.message,
+            stack: error.stack
+        });
     }
 };
 

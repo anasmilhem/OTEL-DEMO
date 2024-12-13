@@ -5,10 +5,10 @@ metadata:
   namespace: dynatrace
 spec:
   envFrom:
-  - secretRef:
-      name: dynatrace-otelcol-dt-api-credentials
-  env:                           # Add this section
-    - name: KUBE_NODE_NAME      # Add this environment variable
+    - secretRef:
+        name: dynatrace-otelcol-dt-api-credentials
+  env: # Add this section
+    - name: KUBE_NODE_NAME # Add this environment variable
       valueFrom:
         fieldRef:
           apiVersion: v1
@@ -36,7 +36,7 @@ spec:
     - name: varlogcontainers
       mountPath: /var/log/containers
       readOnly: true
-  # 
+  #
   config: |
     receivers:
       otlp:
@@ -217,4 +217,3 @@ spec:
         logs:
           receivers: [otlp,filelog]
           processors: [resourcedetection/gcp, resource, attributes, k8sattributes,batch]
-     

@@ -57,8 +57,18 @@ jobs:
 
       - name: Deploy to DigitalOcean Kubernetes
         run: |
+          # Create namespaces
           kubectl apply -f k8s/namespace.yaml
           kubectl apply -f k8s/do-registry.yaml
+          
+          # Deploy OTEL Collector and RBAC
+          kubectl apply -f k8s/otel-collector/rbac.yaml
+          kubectl apply -f k8s/otel-collector/otel-collector-daemonset.yaml
+          
+          # Wait for OTEL collector to be ready
+          kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=opentelemetry-collector -n dynatrace --timeout=120s
+          
+          # Deploy application components
           kubectl apply -f k8s/database/mongodb.yaml
           kubectl wait --for=condition=ready pod -l app=mongodb -n custom-otel-app --timeout=120s
           kubectl apply -f k8s/backend/deployment.yaml -n custom-otel-app
@@ -67,6 +77,10 @@ jobs:
 
       - name: Verify deployment
         run: |
+          # Verify OTEL collector deployment
+          kubectl rollout status daemonset/dynatrace-logs-collector -n dynatrace
+          
+          # Verify application deployments
           kubectl rollout status deployment/backend -n custom-otel-app
           kubectl rollout status deployment/frontend -n custom-otel-app
           kubectl rollout status deployment/load-generator -n custom-otel-app
