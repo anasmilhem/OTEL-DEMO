@@ -16,13 +16,13 @@ spec:
       imagePullSecrets:
         - name: registry-otel-demo
       initContainers:
-        - name: wait-for-postgres
+        - name: wait-for-mongodb
           image: busybox
           command:
             [
               "sh",
               "-c",
-              "until nc -z postgres 5432; do echo waiting for postgres; sleep 2; done;",
+              "until nc -z mongodb 27017; do echo waiting for mongodb; sleep 2; done;",
             ]
       containers:
         - name: backend
@@ -31,6 +31,8 @@ spec:
           ports:
             - containerPort: 3000
           env:
+            - name: MONGODB_URI
+              value: "mongodb://mongodb:27017/productdb"
             - name: NODE_ENV
               value: "production"
             - name: PORT
