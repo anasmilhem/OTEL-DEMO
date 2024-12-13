@@ -32,7 +32,7 @@ const loggerProvider = new LoggerProvider({
 
 // Configure OTLP exporter
 const logsExporter = new OTLPLogsExporter({
-    url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://dynatrace-logs-collector-monitoring:8888/v1/logs'
+    url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://dynatrace-logs-collector-monitoring:4318/v1/logs'
 });
 
 // Bridge Winston to OpenTelemetry

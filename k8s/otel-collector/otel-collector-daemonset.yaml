@@ -1,4 +1,4 @@
-apiVersion: opentelemetry.io/v1alpha1
+apiVersion: opentelemetry.io/v1beta1
 kind: OpenTelemetryCollector
 metadata:
   name: dynatrace-logs
@@ -14,7 +14,7 @@ spec:
           apiVersion: v1
           fieldPath: spec.nodeName
   mode: "daemonset"
-  image: "ghcr.io/dynatrace/dynatrace-otel-collector/dynatrace-otel-collector:0.8.0"
+  image: "ghcr.io/dynatrace/dynatrace-otel-collector/dynatrace-otel-collector:latest"
   observability:
     metrics:
       enableMetrics: true
