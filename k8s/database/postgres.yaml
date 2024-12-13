@@ -36,10 +36,12 @@ spec:
             - name: POSTGRES_USER
               value: "admin"
             - name: POSTGRES_PASSWORD
-              value: "admin123" # In production, use secrets
+              value: "admin123"
+            - name: PGDATA
+              value: "/var/lib/postgresql/data/pgdata"
           volumeMounts:
             - name: postgres-data
-              mountPath: /var/lib/postgresql/data
+              mountPath: "/var/lib/postgresql/data"
       volumes:
         - name: postgres-data
           persistentVolumeClaim:
