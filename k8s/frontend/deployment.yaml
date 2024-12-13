@@ -23,7 +23,7 @@ spec:
             - containerPort: 80
           env:
             - name: REACT_APP_API_URL
-              value: "http://backend"
+              value: "http://backend:80"
 ---
 apiVersion: v1
 kind: Service

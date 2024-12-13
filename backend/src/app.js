@@ -6,8 +6,14 @@ const productRoutes = require('./routes/product');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// CORS configuration
+app.use(cors({
+    origin: '*',  // In production, you should specify your frontend URL
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 // Middleware
-app.use(cors());
 app.use(express.json());
 
 // Connect to MongoDB
