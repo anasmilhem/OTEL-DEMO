@@ -53,6 +53,12 @@ spec:
         exclude:
           # Exclude logs from all containers named otel-collector
           - /var/log/pods/*/otc-container/*.log
+          - /var/log/pods/*/otel-collector/*.log
+          - /var/log/pods/custom-otel-app/*/*.log
+          - /var/log/pods/load-generator/*/*.log
+          - /var/log/pods/backend/*/*.log
+          - /var/log/pods/frontend/*/*.log
+          - /var/log/pods/database/*/*.log
         start_at: beginning
         include_file_path: true
         include_file_name: false
