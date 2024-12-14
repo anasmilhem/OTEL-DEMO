@@ -51,6 +51,7 @@ spec:
           - /var/log/pods/*/*/*.log
         exclude:
           - /var/log/pods/*/otc-container/*.log
+          - /var/log/pods/custom-otel-app_*/*/*.log
         start_at: beginning
         include_file_path: true
         include_file_name: false
@@ -216,9 +217,9 @@ spec:
           receivers: [otlp]
           processors:
             [k8sattributes, resourcedetection/gcp, resource, attributes, batch]
-          exporters: [debug, otlphttp/dynatrace]
+          exporters: [debug]
         logs/filelog:
           receivers: [filelog]
           processors:
             [k8sattributes, resourcedetection/gcp, resource, attributes, batch]
-          exporters: [debug, otlphttp/dynatrace]
+          exporters: [otlphttp/dynatrace]

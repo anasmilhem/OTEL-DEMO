@@ -1,0 +1,17 @@
+apiVersion: opentelemetry.io/v1alpha1
+kind: Instrumentation
+metadata:
+  name: demo-instrumentation
+spec:
+  exporter:
+    endpoint: http://demo-collector:4317 # Where to send the telemetry data
+  propagators:
+    - tracecontext # Enables distributed tracing context
+    - baggage # Enables passing metadata between services
+  sampler:
+    type: parentbased_traceidratio # Sampling strategy
+    argument: "1" # Sample 100% of traces
+  nodejs:
+    env:
+      - name: OTEL_NODE_ENABLED_INSTRUMENTATIONS
+        value: http,express,mongodb # Only enable these instrumentations
