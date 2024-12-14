@@ -4,6 +4,7 @@ metadata:
   name: dynatrace-logs
   namespace: dynatrace
 spec:
+  managementState: "managed"
   envFrom:
     - secretRef:
         name: dynatrace-otelcol-dt-api-credentials
