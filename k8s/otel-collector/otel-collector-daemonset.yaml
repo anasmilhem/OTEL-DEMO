@@ -49,16 +49,8 @@ spec:
       filelog:
         include:
           - /var/log/pods/*/*/*.log
-          - /var/log/containers/*.log
         exclude:
-          # Exclude logs from all containers named otel-collector
           - /var/log/pods/*/otc-container/*.log
-          - /var/log/pods/*/otel-collector/*.log
-          - /var/log/pods/custom-otel-app/*/*.log
-          - /var/log/pods/load-generator/*/*.log
-          - /var/log/pods/backend/*/*.log
-          - /var/log/pods/frontend/*/*.log
-          - /var/log/pods/database/*/*.log
         start_at: beginning
         include_file_path: true
         include_file_name: false
@@ -130,22 +122,19 @@ spec:
           - type: move
             from: attributes.uid
             to: resource["k8s.pod.uid"]
+          # Remove unwanted attributes
           - type: remove
             field: attributes.log # duplicate value of content/body
           - type: remove
             field: attributes.logtag # always the same value
           - type: remove
             field: attributes.time # duplicate value of timestamp
+
     processors:
-      probabilistic_sampler:
-        sampling_percentage: 50
-        attribute_source: "record"
-        from_attribute: "k8s.pod.name"
-        hash_seed: 42
       batch:
-        send_batch_max_size: 1500
-        timeout: 60s
-        send_batch_size: 1000
+        send_batch_max_size: 2000
+        timeout: 30s
+        send_batch_size: 1500
       resource:
         attributes:
           - key: k8s.pod.ip
@@ -211,23 +200,25 @@ spec:
           Authorization: "Api-Token ${env:DT_API_TOKEN}"
       debug:
         verbosity: detailed
-        sampling_initial: 5
-        sampling_thereafter: 20
+        sampling_initial: 1
+        sampling_thereafter: 5
 
     service:
       telemetry:
         logs:
           level: "debug"
+          initial_fields:
+            component: "filelog"
         metrics:
           level: "detailed"
       pipelines:
         logs/otlp:
           receivers: [otlp]
           processors:
-            [resourcedetection/gcp, resource, attributes, k8sattributes, batch]
+            [k8sattributes, resourcedetection/gcp, resource, attributes, batch]
           exporters: [debug, otlphttp/dynatrace]
         logs/filelog:
           receivers: [filelog]
           processors:
-            [resourcedetection/gcp, resource, attributes, k8sattributes, batch]
-          exporters: [otlphttp/dynatrace]
+            [k8sattributes, resourcedetection/gcp, resource, attributes, batch]
+          exporters: [debug, otlphttp/dynatrace]

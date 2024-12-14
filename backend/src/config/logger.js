@@ -4,7 +4,38 @@ const { SemanticResourceAttributes } = require('@opentelemetry/semantic-conventi
 const { LoggerProvider, BatchLogRecordProcessor } = require('@opentelemetry/sdk-logs');
 const { OTLPLogsExporter } = require('@opentelemetry/exporter-logs-otlp-http');
 
-// Configure Winston logger
+// Configure OTLP exporter first
+const logsExporter = new OTLPLogsExporter({
+    url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://dynatrace-logs-collector.dynatrace:4318' // Remove /v1/logs
+});
+
+// Initialize OpenTelemetry logging
+const loggerProvider = new LoggerProvider({
+    resource: new Resource({
+        [SemanticResourceAttributes.SERVICE_NAME]: 'product-service',
+        [SemanticResourceAttributes.SERVICE_VERSION]: '1.0.0',
+        environment: process.env.NODE_ENV || 'development'
+    })
+});
+
+loggerProvider.addLogRecordProcessor(new BatchLogRecordProcessor(logsExporter));
+const otelLogger = loggerProvider.getLogger('product-service');
+
+// Configure Winston with a custom transport
+const OTLPTransport = winston.transports.Stream;
+const transport = new OTLPTransport({
+    stream: {
+        write: (log) => {
+            const parsedLog = JSON.parse(log);
+            otelLogger.emit({
+                severityText: parsedLog.level.toUpperCase(),
+                body: parsedLog.message,
+                attributes: parsedLog
+            });
+        }
+    }
+});
+
 const logger = winston.createLogger({
     level: 'info',
     format: winston.format.combine(
@@ -17,37 +48,19 @@ const logger = winston.createLogger({
         environment: process.env.NODE_ENV || 'development'
     },
     transports: [
-        new winston.transports.Console()
+        new winston.transports.Console(),
+        transport
     ]
 });
 
-// Initialize OpenTelemetry logging
-const loggerProvider = new LoggerProvider({
-    resource: new Resource({
-        [SemanticResourceAttributes.SERVICE_NAME]: 'product-service',
-        [SemanticResourceAttributes.SERVICE_VERSION]: '1.0.0',
-        environment: process.env.NODE_ENV || 'development'
-    })
+// Add shutdown handler
+process.on('SIGTERM', () => {
+    loggerProvider.shutdown()
+        .then(() => process.exit(0))
+        .catch((error) => {
+            console.error('Error shutting down logger provider:', error);
+            process.exit(1);
+        });
 });
 
-// Configure OTLP exporter
-const logsExporter = new OTLPLogsExporter({
-    url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://dynatrace-logs-collector.dynatrace:4318/v1/logs'
-});
-
-// Bridge Winston to OpenTelemetry
-logger.on('data', (log) => {
-    const otelLogger = loggerProvider.getLogger('product-service');
-    otelLogger.emit({
-        severityText: log.level.toUpperCase(),
-        body: log.message,
-        attributes: {
-            ...log,
-            timestamp: log.timestamp
-        }
-    });
-});
-
-loggerProvider.addLogRecordProcessor(new BatchLogRecordProcessor(logsExporter));
-
-module.exports = { logger, loggerProvider }; 
+module.exports = { logger, loggerProvider };
