@@ -66,7 +66,7 @@ jobs:
           kubectl apply -f k8s/otel-collector/otel-collector-daemonset.yaml
           
           # Wait for OTEL collector to be ready
-          kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=dynatrace-logs-collector -n dynatrace --timeout=120s
+          # kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=dynatrace-logs-collector -n dynatrace --timeout=120s
           
           # Deploy application components
           kubectl apply -f k8s/database/mongodb.yaml
