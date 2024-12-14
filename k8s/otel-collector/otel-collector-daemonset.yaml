@@ -219,3 +219,4 @@ spec:
           receivers: [otlp, filelog]
           processors:
             [resourcedetection/gcp, resource, attributes, k8sattributes, batch]
+          exporters: [otlphttp/dynatrace, debug]
