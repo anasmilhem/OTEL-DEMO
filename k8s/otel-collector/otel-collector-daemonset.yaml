@@ -221,8 +221,13 @@ spec:
         metrics:
           level: "detailed"
       pipelines:
-        logs:
-          receivers: [otlp, filelog]
+        logs/otlp:
+          receivers: [otlp]
           processors:
             [resourcedetection/gcp, resource, attributes, k8sattributes, batch]
-          exporters: [otlphttp/dynatrace, debug]
+          exporters: [debug, otlphttp/dynatrace]
+        logs/filelog:
+          receivers: [filelog]
+          processors:
+            [resourcedetection/gcp, resource, attributes, k8sattributes, batch]
+          exporters: [otlphttp/dynatrace]
