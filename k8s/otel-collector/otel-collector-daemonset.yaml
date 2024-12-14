@@ -37,7 +37,7 @@ spec:
       mountPath: /var/log/containers
       readOnly: true
   #
-  config: |
+  config:
     receivers:
       otlp:
         protocols:
@@ -70,30 +70,30 @@ spec:
           - type: regex_parser
             id: parser-crio
             regex:
-              '^(?P<time>[^ Z]+) (?P<stream>stdout|stderr) (?P<logtag>[^ ]*)
-              ?(?P<log>.*)$'
+              "^(?P<time>[^ Z]+) (?P<stream>stdout|stderr) (?P<logtag>[^ ]*)
+              ?(?P<log>.*)$"
             output: extract_metadata_from_filepath
             timestamp:
               parse_from: attributes.time
               layout_type: gotime
-              layout: '2006-01-02T15:04:05.999999999Z07:00'
+              layout: "2006-01-02T15:04:05.999999999Z07:00"
           # Parse CRI-Containerd format
           - type: regex_parser
             id: parser-containerd
             regex:
-              '^(?P<time>[^ ^Z]+Z) (?P<stream>stdout|stderr) (?P<logtag>[^ ]*)
-              ?(?P<log>.*)$'
+              "^(?P<time>[^ ^Z]+Z) (?P<stream>stdout|stderr) (?P<logtag>[^ ]*)
+              ?(?P<log>.*)$"
             output: extract_metadata_from_filepath
             timestamp:
               parse_from: attributes.time
-              layout: '%Y-%m-%dT%H:%M:%S.%LZ'
+              layout: "%Y-%m-%dT%H:%M:%S.%LZ"
           # Parse Docker format
           - type: json_parser
             id: parser-docker
             output: extract_metadata_from_filepath
             timestamp:
               parse_from: attributes.time
-              layout: '%Y-%m-%dT%H:%M:%S.%LZ'
+              layout: "%Y-%m-%dT%H:%M:%S.%LZ"
           - type: move
             from: attributes.log
             to: body
@@ -141,22 +141,22 @@ spec:
         send_batch_size: 1000
       resource:
         attributes:
-        - key: k8s.pod.ip
-          action: delete
-        - key: k8s.cluster.name
-          value: anas-otel
-          action: insert
-        - key: dt.security_context
-          from_attribute: k8s.cluster.name
-          action: insert
+          - key: k8s.pod.ip
+            action: delete
+          - key: k8s.cluster.name
+            value: anas-otel
+            action: insert
+          - key: dt.security_context
+            from_attribute: k8s.cluster.name
+            action: insert
       attributes:
         actions:
-        - key: telemetry.sdk.name
-          value: opentelemetry
-          action: insert
-        - key: dynatrace.otel.collector
-          value: dynatrace-logs
-          action: insert
+          - key: telemetry.sdk.name
+            value: opentelemetry
+            action: insert
+          - key: dynatrace.otel.collector
+            value: dynatrace-logs
+            action: insert
       resourcedetection/gcp:
         detectors: [env, gcp]
         timeout: 2s
@@ -165,7 +165,7 @@ spec:
         auth_type: "serviceAccount"
         passthrough: false
         filter:
-         node_from_env_var: KUBE_NODE_NAME
+          node_from_env_var: KUBE_NODE_NAME
         extract:
           metadata:
             - k8s.namespace.name
@@ -215,5 +215,6 @@ spec:
           level: "detailed"
       pipelines:
         logs:
-          receivers: [otlp,filelog]
-          processors: [resourcedetection/gcp, resource, attributes, k8sattributes,batch]
+          receivers: [otlp, filelog]
+          processors:
+            [resourcedetection/gcp, resource, attributes, k8sattributes, batch]
