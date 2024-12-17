@@ -56,7 +56,12 @@ spec:
         include_file_path: true
         include_file_name: false
         operators:
-          # Find out which format is used by kubernetes
+          # Add timestamp parsing at the start
+          - type: time_parser
+            parse_from: attributes.time
+            layout: "%Y-%m-%dT%H:%M:%S.%LZ"
+            layout_type: strptime
+
           - type: router
             id: get-format
             routes:
@@ -207,19 +212,22 @@ spec:
     service:
       telemetry:
         logs:
-          level: "debug"
-          initial_fields:
-            component: "filelog"
+          level: "info"
         metrics:
           level: "detailed"
       pipelines:
-        logs/otlp:
+        logs:
           receivers: [otlp]
           processors:
             [k8sattributes, resourcedetection/gcp, resource, attributes, batch]
-          exporters: [debug]
-        logs/filelog:
-          receivers: [filelog]
+          exporters: [otlphttp/dynatrace, debug]
+        traces:
+          receivers: [otlp]
           processors:
             [k8sattributes, resourcedetection/gcp, resource, attributes, batch]
           exporters: [otlphttp/dynatrace]
+        # logs/filelog:
+        #   receivers: [filelog]
+        #   processors:
+        #     [k8sattributes, resourcedetection/gcp, resource, attributes, batch]
+        #   exporters: [otlphttp/dynatrace]

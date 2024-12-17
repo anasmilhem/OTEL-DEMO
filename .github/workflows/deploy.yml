@@ -65,8 +65,12 @@ jobs:
           kubectl apply -f k8s/otel-collector/rbac.yaml
           kubectl apply -f k8s/otel-collector/otel-collector-daemonset.yaml
           
-          # Wait for OTEL collector to be ready
-          # kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=dynatrace-logs-collector -n dynatrace --timeout=120s
+          # Deploy OpenTelemetry Instrumentation CR
+          kubectl apply -f k8s/otel-instrumentation/node.yaml -n custom-otel-app
+          
+          # Wait for OTEL collector and instrumentation to be ready
+          kubectl wait --for=condition=established crd/instrumentations.opentelemetry.io --timeout=60s
+          kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=dynatrace-logs-collector -n dynatrace --timeout=120s
           
           # Deploy application components
           kubectl apply -f k8s/database/mongodb.yaml

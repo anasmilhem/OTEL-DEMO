@@ -4,7 +4,7 @@ metadata:
   name: demo-instrumentation
 spec:
   exporter:
-    endpoint: http://demo-collector:4317 # Where to send the telemetry data
+    endpoint: http://dynatrace-logs-collector.dynatrace.svc.cluster.local:4318
   propagators:
     - tracecontext # Enables distributed tracing context
     - baggage # Enables passing metadata between services
@@ -14,4 +14,14 @@ spec:
   nodejs:
     env:
       - name: OTEL_NODE_ENABLED_INSTRUMENTATIONS
-        value: http,express,mongodb # Only enable these instrumentations
+        value: http,express,mongodb,winston,mongoose
+      - name: OTEL_EXPORTER_OTLP_PROTOCOL
+        value: "http/protobuf"
+      - name: OTEL_EXPORTER_OTLP_ENDPOINT
+        value: "http://dynatrace-logs-collector.dynatrace.svc.cluster.local:4318"
+      - name: OTEL_NODE_INCLUDE_TRACE_CONTEXT
+        value: "true"
+      - name: OTEL_LOG_LEVEL
+        value: "debug"
+      - name: NODE_DEBUG
+        value: "winston"
