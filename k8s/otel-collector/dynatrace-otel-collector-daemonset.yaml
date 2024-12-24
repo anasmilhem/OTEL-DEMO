@@ -220,12 +220,14 @@ spec:
           receivers: [otlp]
           processors:
             [k8sattributes, resourcedetection/gcp, resource, attributes, batch]
-          exporters: [otlphttp/dynatrace, debug]
+          exporters: [debug]
+          # exporters: [otlphttp/dynatrace, debug]
         traces:
           receivers: [otlp]
           processors:
             [k8sattributes, resourcedetection/gcp, resource, attributes, batch]
-          exporters: [otlphttp/dynatrace]
+          exporters: [debug]
+          # exporters: [otlphttp/dynatrace]
         # logs/filelog:
         #   receivers: [filelog]
         #   processors:

@@ -4,3 +4,13 @@ metadata:
   name: custom-otel-app
   annotations:
     instrumentation.opentelemetry.io/inject-nodejs: "true"
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: otel-demo
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dynatrace

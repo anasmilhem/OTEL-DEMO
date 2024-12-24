@@ -55,22 +55,39 @@ jobs:
       - name: Save DigitalOcean kubeconfig
         run: doctl kubernetes cluster kubeconfig save ${{ env.CLUSTER_NAME }}
 
+      - name: Setup Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: 'latest'
+
+      - name: Add OpenTelemetry Helm repo and install demo
+        run: |
+          helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm-charts
+          helm repo update
+          helm install my-otel-demo open-telemetry/opentelemetry-demo \
+            --version 0.32.8 \
+            --values k8s/otel-demo-app/collecter-values.yaml \
+            --namespace otel-demo \
+            --create-namespace
+
       - name: Deploy to DigitalOcean Kubernetes
         run: |
           # Create namespaces
           kubectl apply -f k8s/namespace.yaml
           kubectl apply -f k8s/do-registry.yaml
           
-          # Deploy OTEL Collector and RBAC
+          # Deploy OTEL Collectors and RBAC
           kubectl apply -f k8s/otel-collector/rbac.yaml
-          kubectl apply -f k8s/otel-collector/otel-collector-daemonset.yaml
+          kubectl apply -f k8s/otel-collector/contrib-otel-collector-daemonset.yaml
+          kubectl apply -f k8s/otel-collector/dynatrace-otel-collector-daemonset.yaml
+          kubectl apply -f k8s/otel-collector/contrib-otel-collector-deployment.yaml
           
           # Deploy OpenTelemetry Instrumentation CR
           kubectl apply -f k8s/otel-instrumentation/node.yaml -n custom-otel-app
           
           # Wait for OTEL collector and instrumentation to be ready
           kubectl wait --for=condition=established crd/instrumentations.opentelemetry.io --timeout=60s
-          kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=dynatrace-logs-collector -n dynatrace --timeout=120s
+          kubectl wait --for=condition=ready pod -l app.kubernetes.io/component=opentelemetry-collector -n dynatrace --timeout=120s
           
           # Deploy application components
           kubectl apply -f k8s/database/mongodb.yaml
@@ -81,8 +98,11 @@ jobs:
 
       - name: Verify deployment
         run: |
-          # Verify OTEL collector deployment
+          # Verify OTEL collector deployments
           kubectl rollout status daemonset/dynatrace-logs-collector -n dynatrace
+          kubectl rollout status daemonset/contrib-otel-collector -n dynatrace
+          kubectl rollout status deployment/contrib-otel-collector -n dynatrace
+          # kubectl rollout status deployment/my-otel-demo -n otel-demo
           
           # Verify application deployments
           kubectl rollout status deployment/backend -n custom-otel-app

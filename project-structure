@@ -21,3 +21,6 @@ opentelemetry-demo/
     ├── frontend/
     ├── database/
     └── load-generator/ 
+
+
+    helm install my-otel-demo open-telemetry/opentelemetry-demo --version 0.32.8 --values k8s/otel-demo-app/collecter-values.yaml --namespace otel-demo
