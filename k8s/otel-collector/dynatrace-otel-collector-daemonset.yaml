@@ -14,6 +14,11 @@ spec:
         fieldRef:
           apiVersion: v1
           fieldPath: spec.nodeName
+    - name: MY_POD_IP
+      valueFrom:
+        fieldRef:
+          apiVersion: v1
+          fieldPath: status.podIP
   mode: "daemonset"
   image: "ghcr.io/dynatrace/dynatrace-otel-collector/dynatrace-otel-collector:latest"
   observability:
@@ -40,6 +45,14 @@ spec:
   #
   config:
     receivers:
+      prometheus:
+        config:
+          scrape_configs:
+          - job_name: dynatrace-opentelemetry-collector-daemonset
+            scrape_interval: 30s
+            static_configs:
+            - targets:
+              - ${MY_POD_IP}:8888
       otlp:
         protocols:
           grpc:
@@ -137,6 +150,12 @@ spec:
             field: attributes.time # duplicate value of timestamp
 
     processors:
+      cumulativetodelta: {}
+      filter/histogram:
+        error_mode: ignore
+        metrics:
+          metric:
+          - 'type == METRIC_DATA_TYPE_HISTOGRAM'
       batch:
         send_batch_max_size: 2000
         timeout: 30s
@@ -220,16 +239,19 @@ spec:
           receivers: [otlp]
           processors:
             [k8sattributes, resourcedetection/gcp, resource, attributes, batch]
-          exporters: [debug]
-          # exporters: [otlphttp/dynatrace, debug]
+          exporters: [otlphttp/dynatrace, debug]
         traces:
           receivers: [otlp]
           processors:
             [k8sattributes, resourcedetection/gcp, resource, attributes, batch]
-          exporters: [debug]
-          # exporters: [otlphttp/dynatrace]
-        # logs/filelog:
-        #   receivers: [filelog]
-        #   processors:
-        #     [k8sattributes, resourcedetection/gcp, resource, attributes, batch]
-        #   exporters: [otlphttp/dynatrace]
+          exporters: [otlphttp/dynatrace]
+        logs/filelog:
+          receivers: [filelog]
+          processors:
+            [k8sattributes, resourcedetection/gcp, resource, attributes, batch]
+          exporters: [otlphttp/dynatrace]
+        metrics/prometheus:
+          receivers: [prometheus]
+          processors: [filter/histogram, cumulativetodelta, batch]
+          exporters: [otlphttp/dynatrace]
+        

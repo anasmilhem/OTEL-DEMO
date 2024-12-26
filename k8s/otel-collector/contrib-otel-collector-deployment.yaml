@@ -7,6 +7,12 @@ metadata:
 spec:
   serviceAccount: collector
   managementState: "managed"
+  env:
+    - name: MY_POD_IP
+      valueFrom:
+        fieldRef:
+          apiVersion: v1
+          fieldPath: status.podIP
   envFrom:
     - secretRef:
         name: dynatrace-otelcol-dt-api-credentials
@@ -20,6 +26,14 @@ spec:
       memory: 512Mi
   config:
     receivers:
+      prometheus:
+        config:
+          scrape_configs:
+          - job_name: contrib-opentelemetry-collector-deployment
+            scrape_interval: 30s
+            static_configs:
+            - targets:
+              - ${MY_POD_IP}:8888
       k8sobjects/events:
         auth_type: "serviceAccount"
         objects:
@@ -34,6 +48,12 @@ spec:
         metadata_collection_interval: 5m
 
     processors:
+      cumulativetodelta: {}
+      filter/histogram:
+        error_mode: ignore
+        metrics:
+          metric:
+          - 'type == METRIC_DATA_TYPE_HISTOGRAM'
       batch:
         send_batch_max_size: 2000
         timeout: 30s
@@ -112,9 +132,12 @@ spec:
         logs:
           receivers: [k8sobjects/events]
           processors: [resourcedetection/gcp, resource, k8sattributes, batch]
-          exporters: [debug]
-          # exporters: [otlphttp/dynatrace, debug]
+          exporters: [otlphttp/dynatrace, debug]
         metrics:
           receivers: [k8s_cluster]
           processors: [resourcedetection/gcp, resource, k8sattributes, batch]
-          exporters: [debug]
+          exporters: [otlphttp/dynatrace, debug]
+        metrics/prometheus:
+          receivers: [prometheus]
+          processors: [filter/histogram, cumulativetodelta, batch]
+          exporters: [otlphttp/dynatrace]

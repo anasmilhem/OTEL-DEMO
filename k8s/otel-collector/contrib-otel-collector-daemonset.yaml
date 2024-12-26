@@ -19,6 +19,11 @@ spec:
       valueFrom:
         fieldRef:
           fieldPath: status.hostIP
+    - name: MY_POD_IP
+      valueFrom:
+        fieldRef:
+          apiVersion: v1
+          fieldPath: status.podIP
   mode: "daemonset"
   image: "otel/opentelemetry-collector-contrib:0.103.0"
   # podAnnotations:
@@ -32,6 +37,14 @@ spec:
       memory: 512Mi
   config:
     receivers:
+      prometheus:
+        config:
+          scrape_configs:
+          - job_name: contrib-opentelemetry-collector-daemonset
+            scrape_interval: 30s
+            static_configs:
+            - targets:
+              - ${MY_POD_IP}:8888
       kubeletstats:
         collection_interval: 30s
         auth_type: "serviceAccount"
@@ -43,6 +56,12 @@ spec:
           - container
 
     processors:
+      cumulativetodelta: {}
+      filter/histogram:
+        error_mode: ignore
+        metrics:
+          metric:
+          - 'type == METRIC_DATA_TYPE_HISTOGRAM'
       batch:
         send_batch_max_size: 1000
         timeout: 30s
@@ -125,5 +144,8 @@ spec:
         metrics:
           receivers: [kubeletstats]
           processors: [k8sattributes, resourcedetection/gcp, resource, batch]
-          exporters: [debug]
-          # exporters: [otlphttp/dynatrace, debug]
+          exporters: [otlphttp/dynatrace, debug]
+        metrics/prometheus:
+          receivers: [prometheus]
+          processors: [filter/histogram, cumulativetodelta, batch]
+          exporters: [otlphttp/dynatrace]
