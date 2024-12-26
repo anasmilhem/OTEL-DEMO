@@ -1,1 +1,11 @@
 node_modules/
+
+# Minikube
+.minikube/
+
+# VS Code
+.vscode/
+
+# Helm
+*.tgz
+charts/
