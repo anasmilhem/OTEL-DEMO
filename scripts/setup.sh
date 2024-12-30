@@ -34,7 +34,6 @@ helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm
 helm repo update
 helm install my-otel-demo open-telemetry/opentelemetry-demo \
     --version 0.32.8 \
-    --set opentelemetry-collector.enabled=false \
     --values k8s/otel-demo-app/collecter-values.yaml \
     --namespace otel-demo \
     --create-namespace

@@ -5,6 +5,7 @@ metadata:
   namespace: dynatrace
 spec:
   managementState: "managed"
+  serviceAccount: collector
   envFrom:
     - secretRef:
         name: dynatrace-otelcol-dt-api-credentials
@@ -48,11 +49,11 @@ spec:
       prometheus:
         config:
           scrape_configs:
-          - job_name: dynatrace-opentelemetry-collector-daemonset
-            scrape_interval: 30s
-            static_configs:
-            - targets:
-              - ${MY_POD_IP}:8888
+            - job_name: dynatrace-opentelemetry-collector-daemonset
+              scrape_interval: 30s
+              static_configs:
+                - targets:
+                    - ${MY_POD_IP}:8888
       otlp:
         protocols:
           grpc:
@@ -64,16 +65,16 @@ spec:
           - /var/log/pods/*/*/*.log
         exclude:
           - /var/log/pods/*/otc-container/*.log
-          - /var/log/pods/custom-otel-app_*/*/*.log
+          # - /var/log/pods/custom-otel-app_*/*/*.log
         start_at: beginning
         include_file_path: true
         include_file_name: false
         operators:
           # Add timestamp parsing at the start
-          - type: time_parser
-            parse_from: attributes.time
-            layout: "%Y-%m-%dT%H:%M:%S.%LZ"
-            layout_type: strptime
+          # - type: time_parser
+          #   parse_from: attributes.time
+          #   layout: "%Y-%m-%dT%H:%M:%S.%LZ"
+          #   layout_type: strptime
 
           - type: router
             id: get-format
@@ -112,9 +113,7 @@ spec:
             timestamp:
               parse_from: attributes.time
               layout: "%Y-%m-%dT%H:%M:%S.%LZ"
-          - type: move
-            from: attributes.log
-            to: body
+
           # Extract metadata from file path
           - type: regex_parser
             id: extract_metadata_from_filepath
@@ -123,6 +122,9 @@ spec:
             cache:
               size: 128 # default maximum amount of Pods per Node is 110
           # Rename attributes
+          - type: move
+            from: attributes.log
+            to: body
           - type: move
             from: attributes.stream
             to: attributes["log.iostream"]
@@ -155,7 +157,7 @@ spec:
         error_mode: ignore
         metrics:
           metric:
-          - 'type == METRIC_DATA_TYPE_HISTOGRAM'
+            - "type == METRIC_DATA_TYPE_HISTOGRAM"
       batch:
         send_batch_max_size: 2000
         timeout: 30s
@@ -235,7 +237,7 @@ spec:
         metrics:
           level: "detailed"
       pipelines:
-        logs:
+        logs/otlp:
           receivers: [otlp]
           processors:
             [k8sattributes, resourcedetection/gcp, resource, attributes, batch]
@@ -254,4 +256,3 @@ spec:
           receivers: [prometheus]
           processors: [filter/histogram, cumulativetodelta, batch]
           exporters: [otlphttp/dynatrace]
-        
