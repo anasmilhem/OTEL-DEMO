@@ -9,23 +9,13 @@
         },
         "ghcr.io/devcontainers/features/docker-in-docker:2": {}
     },
-    "postCreateCommand": "ls -la /workspaces/OTEL-DEMO/scripts && chmod +x /workspaces/OTEL-DEMO/scripts/setup.sh && bash /workspaces/OTEL-DEMO/scripts/setup.sh",
     "customizations": {
         "vscode": {
             "extensions": [
                 "ms-kubernetes-tools.vscode-kubernetes-tools",
                 "ms-azuretools.vscode-docker",
                 "redhat.vscode-yaml"
-            ],
-            "settings": {
-                "terminal.integrated.defaultProfile.linux": "bash",
-                "terminal.integrated.profiles.linux": {
-                    "bash": {
-                        "path": "bash",
-                        "icon": "terminal-bash"
-                    }
-                }
-            }
+            ]
         }
     },
     "forwardPorts": [
@@ -37,5 +27,5 @@
             "onAutoForward": "openBrowser"
         }
     },
-    "waitFor": "postCreateCommand"
+    "remoteUser": "root"
 }
