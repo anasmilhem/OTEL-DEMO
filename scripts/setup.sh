@@ -20,28 +20,36 @@ if ! minikube status >/dev/null 2>&1; then
 fi
 # Create namespaces
 show_progress "Creating Kubernetes namespaces..."
+kubectl create namespace custom-otel-app --dry-run=client -o yaml | kubectl apply -f -
 kubectl apply -f k8s/namespace.yaml
 kubectl apply -f k8s/do-registry.yaml
-# Deploy OpenTelemetry Demo App without collectors
-show_progress "Deploying OpenTelemetry Demo Application (without collectors)..."
+# Deploy OpenTelemetry Demo App without collectors, Grafana, and Jaeger
+show_progress "Deploying OpenTelemetry Demo Application (without collectors, Grafana, and Jaeger)..."
 helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm-charts
 helm repo update
 helm install my-otel-demo open-telemetry/opentelemetry-demo \
     --version 0.32.8 \
     --set opentelemetry-collector.enabled=false \
+    --set grafana.enabled=false \
+    --set jaeger.enabled=false \
     --values k8s/otel-demo-app/collecter-values.yaml \
     --namespace otel-demo \
     --create-namespace
 # Deploy custom application components
 show_progress "Deploying Custom Application Components..."
-kubectl apply -f k8s/database/mongodb.yaml
+# Deploy MongoDB first and wait for it
+kubectl apply -f k8s/database/mongodb.yaml -n custom-otel-app
 wait_for_resource "custom-otel-app" "pod" "app=mongodb"
+
+# Deploy other components with explicit namespace and wait after each
+show_progress "Deploying backend, frontend, and load generator..."
 kubectl apply -f k8s/backend/deployment.yaml -n custom-otel-app
-kubectl apply -f k8s/frontend/deployment.yaml -n custom-otel-app
-kubectl apply -f k8s/load-generator/deployment.yaml -n custom-otel-app
-# Wait for deployments
 wait_for_resource "custom-otel-app" "pod" "app=backend"
+
+kubectl apply -f k8s/frontend/deployment.yaml -n custom-otel-app
 wait_for_resource "custom-otel-app" "pod" "app=frontend"
+
+kubectl apply -f k8s/load-generator/deployment.yaml -n custom-otel-app
 wait_for_resource "custom-otel-app" "pod" "app=load-generator"
 # Set up port forwarding in the background
 show_progress "Setting up port forwarding..."
