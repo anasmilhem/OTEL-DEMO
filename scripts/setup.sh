@@ -1,18 +1,17 @@
-
 #!/bin/bash
 set -e
 
 echo "Starting setup..."
 
-# Start minikube
-minikube start
+# Start minikube with docker driver
+minikube start --driver=docker
 
 # Add helm repo
 helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm-charts
 helm repo update
 
 # Create namespace
-kubectl create namespace otel-demo
+kubectl create namespace otel-demo || true  # Added || true to prevent failure if namespace exists
 
 echo "Setup completed successfully!"
 

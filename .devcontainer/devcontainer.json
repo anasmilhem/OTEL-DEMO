@@ -27,5 +27,6 @@
             "onAutoForward": "openBrowser"
         }
     },
-    "remoteUser": "root"
+    "remoteUser": "vscode",
+    "updateRemoteUserUID": true
 }
