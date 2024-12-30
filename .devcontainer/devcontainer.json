@@ -19,7 +19,8 @@
         }
     },
     "forwardPorts": [
-        8080
+        8080,
+        3000
     ],
     "portsAttributes": {
         "8080": {
@@ -29,9 +30,9 @@
     },
     "remoteUser": "vscode",
     "updateRemoteUserUID": true,
-    "initializeCommand": {
-        "pre-commit": "chmod +x ${localWorkspaceFolder}/scripts/setup.sh"
-    },
-    "postCreateCommand": "sleep 10 && ${localWorkspaceFolder}/scripts/setup.sh",
-    "postStartCommand": "docker info"
+    "postCreateCommand": [
+        "sudo chown -R vscode:vscode /workspaces/OTEL-DEMO",
+        "chmod +x /workspaces/OTEL-DEMO/scripts/setup.sh",
+        "sleep 10 && /workspaces/OTEL-DEMO/scripts/setup.sh"
+    ]
 }
