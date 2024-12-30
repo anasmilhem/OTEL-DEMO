@@ -1,40 +1,15 @@
 {
-    "name": "OpenTelemetry Training Environment",
+    "name": "OTEL Demo",
     "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
     "features": {
-        "ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {
-            "version": "latest",
-            "helm": "latest",
-            "minikube": "latest"
-        },
-        "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+        "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+        "ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {}
     },
     "customizations": {
         "vscode": {
             "extensions": [
-                "ms-kubernetes-tools.vscode-kubernetes-tools",
-                "ms-azuretools.vscode-docker",
-                "redhat.vscode-yaml"
+                "ms-kubernetes-tools.vscode-kubernetes-tools"
             ]
         }
-    },
-    "forwardPorts": [
-        8080,
-        3000
-    ],
-    "portsAttributes": {
-        "8080": {
-            "label": "Demo Application",
-            "onAutoForward": "openBrowser"
-        }
-    },
-    "remoteUser": "vscode",
-    "updateRemoteUserUID": true,
-    "initializeCommand": {
-        "permissions": "chmod +x ${localWorkspaceFolder}/scripts/setup.sh"
-    },
-    "postStartCommand": {
-        "setup": "/workspaces/OTEL-DEMO/scripts/setup.sh"
-    },
-    "waitFor": "postStartCommand"
+    }
 }
