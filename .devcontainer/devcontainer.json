@@ -28,5 +28,10 @@
         }
     },
     "remoteUser": "vscode",
-    "updateRemoteUserUID": true
+    "updateRemoteUserUID": true,
+    "initializeCommand": {
+        "pre-commit": "chmod +x ${localWorkspaceFolder}/scripts/setup.sh"
+    },
+    "postCreateCommand": "sleep 10 && ${localWorkspaceFolder}/scripts/setup.sh",
+    "postStartCommand": "docker info"
 }
