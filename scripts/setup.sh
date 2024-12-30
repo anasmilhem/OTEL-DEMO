@@ -41,9 +41,19 @@ if ! minikube status >/dev/null 2>&1; then
     }
 fi
 
-# Wait for minikube to be ready
-echo "⏳ Waiting for minikube to be ready..."
-kubectl wait --for=condition=ready node/minikube --timeout=180s
+# Wait for kubernetes to be ready
+echo "Waiting for kubernetes to be ready..."
+max_retries=30
+counter=0
+while ! kubectl get nodes &>/dev/null; do
+    counter=$((counter + 1))
+    if [ $counter -gt $max_retries ]; then
+        echo "Error: Kubernetes not ready after $max_retries attempts"
+        exit 1
+    fi
+    echo "Waiting for Kubernetes to be ready... ($counter/$max_retries)"
+    sleep 2
+done
 
 # Create namespaces
 show_progress "Creating Kubernetes namespaces..."
