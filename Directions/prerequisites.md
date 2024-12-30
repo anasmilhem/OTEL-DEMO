@@ -1,7 +1,11 @@
 # Prerequisites for OpenTelemetry Setup
 
 ## 1. Environment Variables
-First, set up the required environment variables:
+First, set up the required environment variables. Make sure your Dynatrace API token has the following access scopes:
+- `Ingest Events`
+- `Ingest Logs`
+- `Ingest Metrics`
+- `Ingest OpenTelemetry traces`
 
 ```bash
 export DT_ENDPOINT="https://YOUR-ENVIRONMENT-ID.live.dynatrace.com/api/v2/otlp"

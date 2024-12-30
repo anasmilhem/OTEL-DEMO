@@ -28,15 +28,17 @@ show_progress "Creating Kubernetes namespaces..."
 kubectl apply -f k8s/namespace.yaml
 kubectl apply -f k8s/do-registry.yaml
 
-# Deploy OpenTelemetry Demo App without collectors
-show_progress "Deploying OpenTelemetry Demo Application (without collectors)..."
+# Deploy OpenTelemetry Demo App without collectors, Jaeger, and Grafana
+show_progress "Deploying OpenTelemetry Demo Application (without collectors, Jaeger, and Grafana)..."
 helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm-charts
 helm repo update
 helm install my-otel-demo open-telemetry/opentelemetry-demo \
     --version 0.32.8 \
     --values k8s/otel-demo-app/collecter-values.yaml \
     --namespace otel-demo \
-    --create-namespace
+    --create-namespace \
+    --set jaeger.enabled=false \
+    --set grafana.enabled=false
 
 # Deploy custom application components
 show_progress "Deploying Custom Application Components..."
