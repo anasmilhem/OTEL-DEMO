@@ -9,7 +9,6 @@
         },
         "ghcr.io/devcontainers/features/docker-in-docker:2": {}
     },
-    "postCreateCommand": "chmod +x ${containerWorkspaceFolder}/scripts/setup.sh && ${containerWorkspaceFolder}/scripts/setup.sh",
     "customizations": {
         "vscode": {
             "extensions": [
@@ -36,6 +35,5 @@
             "label": "Demo Application",
             "onAutoForward": "openBrowser"
         }
-    },
-    "waitFor": "postCreateCommand"
+    }
 }
