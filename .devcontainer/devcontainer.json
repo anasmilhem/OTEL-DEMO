@@ -9,7 +9,7 @@
         },
         "ghcr.io/devcontainers/features/docker-in-docker:2": {}
     },
-    "postCreateCommand": "chmod +x ${containerWorkspaceFolder}/scripts/setup.sh && ${containerWorkspaceFolder}/scripts/setup.sh",
+    "postCreateCommand": "ls -la /workspaces/OTEL-DEMO/scripts && chmod +x /workspaces/OTEL-DEMO/scripts/setup.sh && bash /workspaces/OTEL-DEMO/scripts/setup.sh",
     "customizations": {
         "vscode": {
             "extensions": [
