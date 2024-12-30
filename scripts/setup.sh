@@ -13,6 +13,18 @@ wait_for_resource() {
 show_progress() {
     echo "✨ $1"
 }
+# Function to wait for StatefulSet
+wait_for_statefulset() {
+    local namespace=$1
+    local name=$2
+    echo "⏳ Waiting for StatefulSet $name in namespace $namespace..."
+    kubectl rollout status statefulset/$name -n $namespace --timeout=300s || {
+        echo "❌ Timeout waiting for StatefulSet $name"
+        kubectl describe statefulset $name -n $namespace
+        kubectl get pods -n $namespace
+        return 1
+    }
+}
 # Start minikube if not running
 if ! minikube status >/dev/null 2>&1; then
     show_progress "Starting minikube cluster..."
@@ -37,20 +49,33 @@ helm install my-otel-demo open-telemetry/opentelemetry-demo \
     --create-namespace
 # Deploy custom application components
 show_progress "Deploying Custom Application Components..."
+
 # Deploy MongoDB first and wait for it
+show_progress "Deploying MongoDB..."
 kubectl apply -f k8s/database/mongodb.yaml -n custom-otel-app
-wait_for_resource "custom-otel-app" "pod" "app=mongodb"
+wait_for_statefulset "custom-otel-app" "mongodb"
 
-# Deploy other components with explicit namespace and wait after each
-show_progress "Deploying backend, frontend, and load generator..."
+# Verify MongoDB is ready before proceeding
+until kubectl get pod mongodb-0 -n custom-otel-app -o jsonpath='{.status.phase}' | grep -q "Running"; do
+    echo "Waiting for MongoDB pod to be running..."
+    sleep 5
+done
+
+# Deploy backend and wait
+show_progress "Deploying backend..."
 kubectl apply -f k8s/backend/deployment.yaml -n custom-otel-app
-wait_for_resource "custom-otel-app" "pod" "app=backend"
+wait_for_resource "custom-otel-app" "deployment" "app=backend"
 
+# Deploy frontend and wait
+show_progress "Deploying frontend..."
 kubectl apply -f k8s/frontend/deployment.yaml -n custom-otel-app
-wait_for_resource "custom-otel-app" "pod" "app=frontend"
+wait_for_resource "custom-otel-app" "deployment" "app=frontend"
 
+# Deploy load generator and wait
+show_progress "Deploying load generator..."
 kubectl apply -f k8s/load-generator/deployment.yaml -n custom-otel-app
-wait_for_resource "custom-otel-app" "pod" "app=load-generator"
+wait_for_resource "custom-otel-app" "deployment" "app=load-generator"
+
 # Set up port forwarding in the background
 show_progress "Setting up port forwarding..."
 kubectl port-forward svc/my-otel-demo-frontendproxy -n otel-demo 8080:8080 &
