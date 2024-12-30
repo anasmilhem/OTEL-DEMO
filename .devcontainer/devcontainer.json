@@ -30,9 +30,11 @@
     },
     "remoteUser": "vscode",
     "updateRemoteUserUID": true,
-    "postCreateCommand": [
-        "sudo chown -R vscode:vscode /workspaces/OTEL-DEMO",
-        "chmod +x /workspaces/OTEL-DEMO/scripts/setup.sh",
-        "sleep 10 && /workspaces/OTEL-DEMO/scripts/setup.sh"
-    ]
+    "initializeCommand": {
+        "permissions": "chmod +x ${localWorkspaceFolder}/scripts/setup.sh"
+    },
+    "postStartCommand": {
+        "setup": "/workspaces/OTEL-DEMO/scripts/setup.sh"
+    },
+    "waitFor": "postStartCommand"
 }
