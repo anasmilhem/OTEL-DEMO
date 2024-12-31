@@ -40,7 +40,8 @@ fi
 show_progress "Creating Kubernetes namespaces..."
 kubectl create namespace custom-otel-app --dry-run=client -o yaml | kubectl apply -f -
 kubectl apply -f k8s/namespace.yaml
-kubectl apply -f k8s/do-registry.yaml
+# Apply registry secret to the custom-otel-app namespace
+kubectl apply -f k8s/do-registry.yaml -n custom-otel-app
 # Deploy OpenTelemetry Demo App without collectors, Grafana, and Jaeger
 show_progress "Deploying OpenTelemetry Demo Application (without collectors, Grafana, and Jaeger)..."
 helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm-charts
@@ -67,20 +68,15 @@ until kubectl get pod mongodb-0 -n custom-otel-app -o jsonpath='{.status.phase}'
     sleep 5
 done
 
-# Deploy backend and wait
+# Deploy other components without waiting
 show_progress "Deploying backend..."
 kubectl apply -f k8s/backend/deployment.yaml -n custom-otel-app
-wait_for_resource "custom-otel-app" "deployment" "app=backend" "backend"
 
-# Deploy frontend and wait
 show_progress "Deploying frontend..."
 kubectl apply -f k8s/frontend/deployment.yaml -n custom-otel-app
-wait_for_resource "custom-otel-app" "deployment" "app=frontend" "frontend"
 
-# Deploy load generator and wait
 show_progress "Deploying load generator..."
 kubectl apply -f k8s/load-generator/deployment.yaml -n custom-otel-app
-wait_for_resource "custom-otel-app" "deployment" "app=load-generator" "load-generator"
 
 # Set up port forwarding in the background
 show_progress "Setting up port forwarding..."
