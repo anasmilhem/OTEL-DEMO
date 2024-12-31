@@ -6,8 +6,14 @@ wait_for_resource() {
     local namespace=$1
     local resource_type=$2
     local label=$3
-    echo "⏳ Waiting for $resource_type in namespace $namespace..."
-    kubectl wait --for=condition=ready $resource_type -l $label -n $namespace --timeout=300s
+    local name=$4
+    echo "⏳ Waiting for $resource_type $name in namespace $namespace..."
+    kubectl wait --for=condition=ready "$resource_type/$name" -n "$namespace" --timeout=300s || {
+        echo "❌ Error waiting for $resource_type $name"
+        kubectl describe "$resource_type/$name" -n "$namespace"
+        kubectl get pods -n "$namespace"
+        return 1
+    }
 }
 # Function to show setup progress
 show_progress() {
