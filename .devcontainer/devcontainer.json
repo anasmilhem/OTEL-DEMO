@@ -9,30 +9,28 @@
         },
         "ghcr.io/devcontainers/features/docker-in-docker:2": {}
     },
+    "postCreateCommand": "chmod +x scripts/setup.sh",
+    "postStartCommand": "./scripts/setup.sh",
     "customizations": {
         "vscode": {
             "extensions": [
                 "ms-kubernetes-tools.vscode-kubernetes-tools",
                 "ms-azuretools.vscode-docker",
                 "redhat.vscode-yaml"
-            ],
-            "settings": {
-                "terminal.integrated.defaultProfile.linux": "bash",
-                "terminal.integrated.profiles.linux": {
-                    "bash": {
-                        "path": "bash",
-                        "icon": "terminal-bash"
-                    }
-                }
-            }
+            ]
         }
     },
     "forwardPorts": [
-        8080
+        8080,
+        3000
     ],
     "portsAttributes": {
         "8080": {
             "label": "Demo Application",
+            "onAutoForward": "openBrowser"
+        },
+        "3000": {
+            "label": "Custom Application",
             "onAutoForward": "openBrowser"
         }
     }

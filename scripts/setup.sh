@@ -64,17 +64,17 @@ done
 # Deploy backend and wait
 show_progress "Deploying backend..."
 kubectl apply -f k8s/backend/deployment.yaml -n custom-otel-app
-wait_for_resource "custom-otel-app" "deployment" "app=backend"
+wait_for_resource "custom-otel-app" "deployment" "app=backend" "backend"
 
 # Deploy frontend and wait
 show_progress "Deploying frontend..."
 kubectl apply -f k8s/frontend/deployment.yaml -n custom-otel-app
-wait_for_resource "custom-otel-app" "deployment" "app=frontend"
+wait_for_resource "custom-otel-app" "deployment" "app=frontend" "frontend"
 
 # Deploy load generator and wait
 show_progress "Deploying load generator..."
 kubectl apply -f k8s/load-generator/deployment.yaml -n custom-otel-app
-wait_for_resource "custom-otel-app" "deployment" "app=load-generator"
+wait_for_resource "custom-otel-app" "deployment" "app=load-generator" "load-generator"
 
 # Set up port forwarding in the background
 show_progress "Setting up port forwarding..."
