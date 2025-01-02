@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { Product, CreateProductInput } from '../types/product';
 
-const API_URL = 'http://localhost:3000/api';
+const API_URL = '/api';
 
 export interface ProductsResponse {
     products: Product[];
