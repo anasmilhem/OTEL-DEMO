@@ -28,14 +28,26 @@ app.use(cors({
 // Middleware
 app.use(express.json());
 
+// Add this at the top of your file after other requires
+process.on('uncaughtException', (error) => {
+    logger.error('Uncaught Exception', {
+        error: error.message,
+        stack: error.stack
+    });
+    process.exit(1);
+});
+
 // Connect to MongoDB and initialize data
 const startup = async () => {
     try {
         await connectDB();
         await initializeDb();
-        logger.info('Application started successfully', {
-            port: PORT,
-            environment: process.env.NODE_ENV || 'development'
+
+        app.listen(PORT, () => {
+            logger.info('Application started successfully', {
+                port: PORT,
+                environment: process.env.NODE_ENV || 'development'
+            });
         });
     } catch (error) {
         logger.error('Application startup failed', {
@@ -45,7 +57,6 @@ const startup = async () => {
         process.exit(1);
     }
 };
-startup();
 
 // Routes
 app.use('/api/products', productRoutes);
@@ -55,6 +66,11 @@ app.get('/health', (req, res) => {
     res.status(200).json({ status: 'healthy' });
 });
 
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+// Move this to after all your route definitions
+startup().catch((error) => {
+    logger.error('Failed to start application', {
+        error: error.message,
+        stack: error.stack
+    });
+    process.exit(1);
 }); 

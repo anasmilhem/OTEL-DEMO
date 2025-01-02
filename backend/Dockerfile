@@ -1,12 +1,19 @@
-FROM node:18-slim
+FROM node:18-slim AS builder
 
 WORKDIR /app
 
 COPY package*.json ./
 
-RUN npm install
+# Clean install with only production dependencies
+RUN npm ci --only=production
 
 COPY . .
+
+FROM node:18-slim
+
+WORKDIR /app
+
+COPY --from=builder /app .
 
 EXPOSE 3000
 
