@@ -8,7 +8,17 @@ const productRoutes = require('./routes/product');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Add logging middleware
+// Uncaught exception handler
+process.on('uncaughtException', (error) => {
+    logger.error('Uncaught Exception', {
+        error: error.message,
+        stack: error.stack
+    });
+    process.exit(1);
+});
+
+// Middleware
+app.use(express.json());
 app.use((req, res, next) => {
     logger.info('Incoming request', {
         path: req.path,
@@ -19,25 +29,32 @@ app.use((req, res, next) => {
 });
 
 // CORS configuration
+app.use((req, res, next) => {
+    logger.info('Incoming request details', {
+        origin: req.headers.origin,
+        method: req.method,
+        path: req.path,
+        headers: req.headers
+    });
+    next();
+});
+
 app.use(cors({
     origin: '*',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
 }));
 
-// Middleware
-app.use(express.json());
+// Routes
+app.use('/api/products', productRoutes);
 
-// Add this at the top of your file after other requires
-process.on('uncaughtException', (error) => {
-    logger.error('Uncaught Exception', {
-        error: error.message,
-        stack: error.stack
-    });
-    process.exit(1);
+// Health check endpoint
+app.get('/health', (req, res) => {
+    res.status(200).json({ status: 'healthy' });
 });
 
-// Connect to MongoDB and initialize data
+// Server startup
 const startup = async () => {
     try {
         await connectDB();
@@ -58,15 +75,6 @@ const startup = async () => {
     }
 };
 
-// Routes
-app.use('/api/products', productRoutes);
-
-// Health check endpoint
-app.get('/health', (req, res) => {
-    res.status(200).json({ status: 'healthy' });
-});
-
-// Move this to after all your route definitions
 startup().catch((error) => {
     logger.error('Failed to start application', {
         error: error.message,
