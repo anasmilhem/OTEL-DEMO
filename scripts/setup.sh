@@ -31,10 +31,10 @@ wait_for_statefulset() {
         return 1
     }
 }
-# Start kind cluster if not running
-if ! kind get clusters | grep -q "kind"; then
-    show_progress "Starting kind cluster..."
-    kind create cluster
+# Start k3d cluster if not running
+if ! k3d cluster list | grep -q "k3s-default"; then
+    show_progress "Starting k3d cluster..."
+    k3d cluster create
 fi
 # Create namespaces
 show_progress "Creating Kubernetes namespaces..."
@@ -86,7 +86,7 @@ show_progress "Creating welcome message..."
 cat << 'EOF' > ~/.welcome_message
 🎉 Welcome to the OpenTelemetry Training Environment! 🎉
 Your environment is ready with:
-- Kubernetes cluster (kind)
+- Kubernetes cluster (k3d)
 - OpenTelemetry Demo App (without collectors) at http://localhost:8080
 - Custom Demo Application at http://localhost:3000
 - MongoDB Database
@@ -99,7 +99,7 @@ Useful commands:
 - kubectl get pods -n otel-demo     # View OpenTelemetry demo pods
 - kubectl get pods -n custom-otel-app # View custom app pods
 - kubectl logs -n custom-otel-app <pod> # View custom app logs
-- kind get clusters               # View kind clusters
+- k3d cluster list               # View k3d clusters
 Happy learning! 🚀
 EOF
 # Add welcome message to bashrc

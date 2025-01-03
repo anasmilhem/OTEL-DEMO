@@ -2,14 +2,18 @@
     "name": "OpenTelemetry Training Environment",
     "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
     "features": {
-        "ghcr.io/devcontainers/features/kind:1": {
-            "version": "latest"
+        "ghcr.io/devcontainers/features/docker-in-docker:2": {
+            "version": "latest",
+            "moby": true
         },
-        "ghcr.io/devcontainers/features/docker-in-docker:2": {},
-        "ghcr.io/devcontainers/features/helm:1": {
+        "ghcr.io/devcontainers/features/k3d:1": {
             "version": "latest"
         }
     },
+    "runArgs": [
+        "--privileged"
+    ],
+    "remoteUser": "root",
     "postCreateCommand": "chmod +x scripts/setup.sh",
     "postStartCommand": "./scripts/setup.sh",
     "customizations": {
