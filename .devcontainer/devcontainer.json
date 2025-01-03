@@ -2,12 +2,13 @@
     "name": "OpenTelemetry Training Environment",
     "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
     "features": {
-        "ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {
-            "version": "latest",
-            "helm": "latest",
-            "minikube": "latest"
+        "ghcr.io/devcontainers/features/k3s:1": {
+            "version": "latest"
         },
-        "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+        "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+        "ghcr.io/devcontainers/features/helm:1": {
+            "version": "latest"
+        }
     },
     "postCreateCommand": "chmod +x scripts/setup.sh",
     "postStartCommand": "./scripts/setup.sh",

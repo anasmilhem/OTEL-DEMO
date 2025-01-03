@@ -31,10 +31,11 @@ wait_for_statefulset() {
         return 1
     }
 }
-# Start minikube if not running
-if ! minikube status >/dev/null 2>&1; then
-    show_progress "Starting minikube cluster..."
-    minikube start --memory=4096 --cpus=2
+# Start k3s if not running
+if ! k3s kubectl get nodes >/dev/null 2>&1; then
+    show_progress "Starting k3s cluster..."
+    k3s server &
+    sleep 10 # Wait for k3s to initialize
 fi
 # Create namespaces
 show_progress "Creating Kubernetes namespaces..."
@@ -86,7 +87,7 @@ show_progress "Creating welcome message..."
 cat << 'EOF' > ~/.welcome_message
 🎉 Welcome to the OpenTelemetry Training Environment! 🎉
 Your environment is ready with:
-- Kubernetes cluster (minikube)
+- Kubernetes cluster (k3s)
 - OpenTelemetry Demo App (without collectors) at http://localhost:8080
 - Custom Demo Application at http://localhost:3000
 - MongoDB Database
@@ -99,7 +100,7 @@ Useful commands:
 - kubectl get pods -n otel-demo     # View OpenTelemetry demo pods
 - kubectl get pods -n custom-otel-app # View custom app pods
 - kubectl logs -n custom-otel-app <pod> # View custom app logs
-- minikube dashboard               # Open Kubernetes dashboard
+- k3s kubectl dashboard               # Open Kubernetes dashboard
 Happy learning! 🚀
 EOF
 # Add welcome message to bashrc
