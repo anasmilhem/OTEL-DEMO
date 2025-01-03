@@ -2,7 +2,7 @@
     "name": "OpenTelemetry Training Environment",
     "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
     "features": {
-        "ghcr.io/devcontainers/features/k3s:1": {
+        "ghcr.io/devcontainers/features/kind:1": {
             "version": "latest"
         },
         "ghcr.io/devcontainers/features/docker-in-docker:2": {},
