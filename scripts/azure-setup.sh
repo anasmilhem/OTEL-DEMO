@@ -3,26 +3,48 @@ set -e
 
 echo "🚀 Starting Azure Kubernetes Environment Setup..."
 
-# Remove subscription setting as it's not needed in Cloud Shell
-# read -p "Enter the Azure subscription ID: " SUBSCRIPTION_ID
-read -p "Enter the resource group name: " RESOURCE_GROUP
-read -p "Enter the AKS cluster name: " CLUSTER_NAME
-read -p "Enter the location (e.g., eastus): " LOCATION
+# Resource Group Selection
+echo "Do you want to use an existing resource group or create a new one?"
+select rg_choice in "Use existing" "Create new"; do
+    case $rg_choice in
+        "Use existing")
+            # List available resource groups
+            echo "Available resource groups:"
+            az group list --query "[].name" -o tsv
+            read -p "Enter the name of the existing resource group: " RESOURCE_GROUP
+            # Verify resource group exists
+            if ! az group show --name $RESOURCE_GROUP >/dev/null 2>&1; then
+                echo "Error: Resource group '$RESOURCE_GROUP' not found"
+                exit 1
+            fi
+            break
+            ;;
+        "Create new")
+            read -p "Enter the name for the new resource group: " RESOURCE_GROUP
+            read -p "Enter the location (e.g., eastus): " LOCATION
+            echo "✨ Creating resource group..."
+            az group create --name $RESOURCE_GROUP --location $LOCATION
+            break
+            ;;
+        *) echo "Invalid option $REPLY";;
+    esac
+done
 
-# Remove subscription setting command as it's not needed
-# az account set --subscription $SUBSCRIPTION_ID
+read -p "Enter the AKS cluster name: " CLUSTER_NAME
 
 # Variables for namespaces
 NAMESPACE_CUSTOM_OTEL_APP="custom-otel-app"
 NAMESPACE_OTEL_DEMO="otel-demo"
 
-# Create a resource group
-echo "✨ Creating resource group..."
-az group create --name $RESOURCE_GROUP --location $LOCATION
-
 # Create an AKS cluster
 echo "✨ Creating AKS cluster..."
-az aks create --resource-group $RESOURCE_GROUP --name $CLUSTER_NAME --node-count 1 --enable-addons monitoring --generate-ssh-keys
+if [ "$rg_choice" = "Create new" ]; then
+    az aks create --resource-group $RESOURCE_GROUP --name $CLUSTER_NAME --node-count 1 --enable-addons monitoring --generate-ssh-keys
+else
+    # For existing resource group, we need to ensure we have the location
+    LOCATION=$(az group show --name $RESOURCE_GROUP --query location -o tsv)
+    az aks create --resource-group $RESOURCE_GROUP --name $CLUSTER_NAME --node-count 1 --enable-addons monitoring --generate-ssh-keys --location $LOCATION
+fi
 
 # Get AKS credentials
 echo "✨ Getting AKS credentials..."
