@@ -53,10 +53,10 @@ select aks_choice in "Use existing" "Create new"; do
             read -p "Enter the name for the new AKS cluster: " CLUSTER_NAME
             echo "✨ Creating AKS cluster..."
             if [ "$rg_choice" = "Create new" ]; then
-                az aks create --resource-group $RESOURCE_GROUP --name $CLUSTER_NAME --node-count 1 --enable-addons monitoring --generate-ssh-keys
+                az aks create --resource-group $RESOURCE_GROUP --name $CLUSTER_NAME --node-count 4 --enable-addons monitoring --generate-ssh-keys
             else
                 LOCATION=$(az group show --name $RESOURCE_GROUP --query location -o tsv)
-                az aks create --resource-group $RESOURCE_GROUP --name $CLUSTER_NAME --node-count 1 --enable-addons monitoring --generate-ssh-keys --location $LOCATION
+                az aks create --resource-group $RESOURCE_GROUP --name $CLUSTER_NAME --node-count 4 --enable-addons monitoring --generate-ssh-keys --location $LOCATION
             fi
             break
             ;;

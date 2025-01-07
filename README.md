@@ -2,17 +2,28 @@
 
 ## Getting Started
 
+### Local Development
 1. Click the "Code" button on this repository
 2. Select "Open with Codespaces"
 3. Click "New codespace"
 
+### Azure Deployment
+1. Download the Azure setup script:
+```bash
+curl -O https://raw.githubusercontent.com/anasmilhem/OTEL-DEMO/main/scripts/azure-setup.sh
+```
+2. Run the script:
+```bash
+chmod +x azure-setup.sh
+./azure-setup.sh
+```
+
 The environment will automatically:
 - Set up a Kubernetes cluster
 - Create necessary namespaces
-- Deploy the demo application
+- Deploy the otel demo application and custom otel example app
 - Configure development tools
 
-The demo application will be available at http://localhost:8080
 
 ## Training Steps
 
@@ -46,10 +57,3 @@ If you encounter any issues with the environment:
 3. Check minikube status: `minikube status`
 4. Access the dashboard: `minikube dashboard`
 
-## Resource Usage
-
-This environment is configured to use:
-- 4GB RAM
-- 2 CPU cores
-
-If you need more resources, you can adjust these in the setup script. 
