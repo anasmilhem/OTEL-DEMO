@@ -159,22 +159,6 @@ kubectl get pods -n custom-otel-app -o yaml | grep -i opentelemetry
 kubectl logs -n dynatrace deployment/dynatrace-logs-collector | grep "trace"
 ```
 
-## Best Practices
-
-1. **Sampling Strategy**:
-   - Start with 100% sampling in development
-   - Adjust based on traffic volume in production
-   - Consider using tail-based sampling
-
-2. **Resource Attribution**:
-   - Set service name via `OTEL_SERVICE_NAME`
-   - Add custom attributes for better filtering
-   - Use consistent naming conventions
-
-3. **Security Considerations**:
-   - Use secure endpoints in production
-   - Implement proper RBAC
-   - Monitor resource usage
 
 ## Troubleshooting
 
