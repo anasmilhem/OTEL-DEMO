@@ -3,6 +3,12 @@
 ## Introduction
 This guide walks through setting up an OpenTelemetry Collector for log collection in a Kubernetes environment, with a focus on collecting container logs using the filelog receiver and forwarding them to Dynatrace.
 
+You can pull the starting template directly from GitHub using:
+
+```bash
+kubectl apply -f https://raw.githubusercontent.com/anasmilhem/OTEL-DEMO/main/Directions/otel-templates/collecters/dynatrace-otel-collecter-daemonset-template.yaml
+```
+
 ## Starting Template
 
 ```yaml:Directions/otel-templates/collecters/dynatrace-otel-collecter-daemonset-template.yaml

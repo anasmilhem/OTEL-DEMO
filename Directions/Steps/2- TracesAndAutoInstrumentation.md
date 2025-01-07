@@ -39,7 +39,7 @@ spec:
 ```
 
 ```bash
-kubectl apply -f k8s/otel-instrumentation/node.yaml -n dynatrace
+kubectl apply -f https://raw.githubusercontent.com/anasmilhem/OTEL-DEMO/main/k8s/otel-instrumentation/node.yaml -n dynatrace
 ```
 
 ### Understanding the Configuration
@@ -75,8 +75,21 @@ metadata:
     instrumentation.opentelemetry.io/inject-nodejs: "true"
 ```
 
+### Method 1: Using kubectl apply after updating the namespace.yaml file
 ```bash
 kubectl apply -f k8s/namespace.yaml
+```
+
+### Method 2: Using kubectl annotate (for existing namespace)
+```bash
+# Add annotation to existing namespace
+kubectl annotate namespace custom-otel-app instrumentation.opentelemetry.io/inject-nodejs="true"
+
+# If you need to update an existing annotation, add --overwrite
+kubectl annotate namespace custom-otel-app instrumentation.opentelemetry.io/inject-nodejs="true" --overwrite
+
+# To verify the annotation
+kubectl get namespace custom-otel-app -o yaml | grep -A 1 annotations
 ```
 
 ### How Auto-Instrumentation Works
@@ -166,10 +179,6 @@ kubectl logs -n dynatrace deployment/dynatrace-logs-collector | grep "trace"
    - Optimize sampling configuration
    - Plan scaling strategy
 
-
-
-// ... previous content ...
-
 ## Step 4: Update DaemonSet Collector Configuration
 
 Before traces can flow through our system, we need to update our DaemonSet collector configuration to handle trace data. Add the following to your `dynatrace-otel-collecter-daemonset-template.yaml`:
@@ -213,4 +222,51 @@ This configuration ensures that:
 - Traces and logs use consistent processing
 - Both telemetry types are enriched with the same metadata
 - The collector can handle both types of data efficiently
+
+## Step 5: Enable OpenTelemetry Collector in Demo Application to send traces and logs from otel demo app collected by the otel sdk
+
+If you've previously installed the OpenTelemetry demo with the collector disabled, you can enable it using one of these methods:
+
+### Method 1: Upgrade Existing Installation
+```bash
+# Upgrade existing installation with collector enabled
+helm upgrade my-otel-demo open-telemetry/opentelemetry-demo `
+    --version 0.32.8 `
+    --set opentelemetry-collector.enabled=true `
+    --values https://raw.githubusercontent.com/anasmilhem/OTEL-DEMO/main/k8s/otel-demo-app/collecter-values.yaml `
+    --namespace otel-demo
+
+# Verify the collector is running
+kubectl get pods -n otel-demo | grep collector
+```
+
+### Method 2: Uninstall and Reinstall
+```bash
+# Uninstall existing deployment
+helm uninstall my-otel-demo -n otel-demo
+
+# Reinstall with collector enabled
+helm install my-otel-demo open-telemetry/opentelemetry-demo \
+    --version 0.32.8 \
+    --set opentelemetry-collector.enabled=true \
+    --values https://raw.githubusercontent.com/anasmilhem/OTEL-DEMO/main/k8s/otel-demo-app/collecter-values.yaml \
+    --namespace otel-demo \
+    --create-namespace
+```
+
+## Step 6: Apply the Complete Collecter Configuration
+
+If you've had any issues following along, you can apply the complete final configuration directly:
+
+```bash
+kubectl apply -f https://raw.githubusercontent.com/anasmilhem/OTEL-DEMO/main/k8s/otel-collector/dynatrace-otel-collector-daemonset.yaml
+```
+
+
+
+
+
+
+
+
 
