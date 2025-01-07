@@ -70,7 +70,7 @@ spec:
 ```
 
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/anasmilhem/OTEL-DEMO/main/k8s/otel-instrumentation/node.yaml -n dynatrace
+kubectl apply -f https://raw.githubusercontent.com/anasmilhem/OTEL-DEMO/main/k8s/otel-instrumentation/node.yaml -n custom-otel-app
 ```
 
 ### Understanding the Configuration
