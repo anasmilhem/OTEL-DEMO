@@ -3,6 +3,24 @@ set -e
 
 echo "🚀 Starting Azure Kubernetes Environment Setup..."
 
+# List and select Azure subscription
+echo "Available Azure subscriptions:"
+az account list --query "[].{Name:name, ID:id}" -o table
+echo ""
+read -p "Enter the subscription ID you want to use: " SUBSCRIPTION_ID
+
+# Set the subscription
+echo "✨ Setting Azure subscription..."
+az account set --subscription $SUBSCRIPTION_ID
+
+# Verify subscription
+CURRENT_SUB=$(az account show --query "id" -o tsv)
+if [ "$CURRENT_SUB" != "$SUBSCRIPTION_ID" ]; then
+    echo "Error: Failed to set subscription"
+    exit 1
+fi
+echo "Using subscription: $(az account show --query "name" -o tsv)"
+
 # Set GitHub raw content URL
 GITHUB_RAW_URL="https://raw.githubusercontent.com/anasmilhem/OTEL-DEMO/main"
 
