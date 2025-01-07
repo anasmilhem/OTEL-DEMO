@@ -6,9 +6,40 @@ After setting up log collection, the next step is to configure automatic instrum
 2. Enabling instrumentation via namespace annotation
 3. Understanding the trace collection process
 
-## Step 1: Creating the Auto-Instrumentation Configuration
+## Step 1: Enable Auto-Instrumentation via Namespace Annotation
 
-First, let's create the instrumentation configuration file:
+Add the auto-instrumentation annotation to your namespace:
+
+```yaml:k8s/namespace.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: custom-otel-app
+  annotations:
+    instrumentation.opentelemetry.io/inject-nodejs: "true"
+```
+
+### Method 1: Using kubectl apply after updating the namespace.yaml file
+```bash
+kubectl apply -f k8s/namespace.yaml
+```
+
+### Method 2: Using kubectl annotate (for existing namespace)
+```bash
+# Add annotation to existing namespace
+kubectl annotate namespace custom-otel-app instrumentation.opentelemetry.io/inject-nodejs="true"
+
+# If you need to update an existing annotation, add --overwrite
+kubectl annotate namespace custom-otel-app instrumentation.opentelemetry.io/inject-nodejs="true" --overwrite
+
+# To verify the annotation
+kubectl get namespace custom-otel-app -o yaml | grep -A 1 annotations
+```
+
+
+## Step 2: Creating the Auto-Instrumentation Configuration
+
+Let's create the instrumentation configuration file:
 
 ```yaml:k8s/otel-instrumentation/node.yaml
 apiVersion: opentelemetry.io/v1alpha1
