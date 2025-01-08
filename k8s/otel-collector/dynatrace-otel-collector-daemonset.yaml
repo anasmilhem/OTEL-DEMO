@@ -260,5 +260,5 @@ spec:
           exporters: [otlphttp/dynatrace]
         metrics/prometheus:
           receivers: [prometheus]
-          processors: [filter/histogram, cumulativetodelta, batch]
+          processors: [k8sattributes, resourcedetection/azure, resource, attributes, filter/histogram, cumulativetodelta, batch]
           exporters: [otlphttp/dynatrace]
