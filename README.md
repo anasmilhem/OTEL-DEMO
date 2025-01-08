@@ -1,4 +1,4 @@
-# OpenTelemetry Training Environment
+![image](https://github.com/user-attachments/assets/a7967a02-fc74-45b1-ba39-bc16488ab282)# OpenTelemetry Training Environment
 
 ## Getting Started
 
@@ -47,13 +47,11 @@ During the training, you'll learn how to:
 - All necessary CLI tools:
   - kubectl
   - helm
-  - minikube
+Dynatrace otel dashboard displaying everything we did
+![image](https://github.com/user-attachments/assets/7f278e97-1f4c-44e8-b3a3-4527124ccbbf)
+Dashboard by isItObservable Henrik Rexed
+![image](https://github.com/user-attachments/assets/99c853b4-d3d5-47fa-9618-bbfcafca0e4d)
 
-## Troubleshooting
 
-If you encounter any issues with the environment:
-1. Try running `~/scripts/setup.sh` to restart the setup
-2. Check running pods: `kubectl get pods -n otel-demo`
-3. Check minikube status: `minikube status`
-4. Access the dashboard: `minikube dashboard`
+    
 
