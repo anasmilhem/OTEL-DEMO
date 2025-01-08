@@ -144,13 +144,18 @@ spec:
           - type: move
             from: attributes.uid
             to: resource["k8s.pod.uid"]
+          # Map to Dynatrace supported timestamp key
+          - type: move
+            from: attributes["time"]
+            to: attributes["timestamp"] # This maps to one of Dynatrace's supported keys
           # Remove unwanted attributes
           - type: remove
-            field: attributes.log # duplicate value of content/body
+            field: attributes["log"] # duplicate value of content/body
           - type: remove
-            field: attributes.logtag # always the same value
+            field: attributes["logtag"] # always the same value
           - type: remove
-            field: attributes.time # duplicate value of timestamp
+            field: attributes["time"]
+
 
     processors:
       cumulativetodelta: {}
