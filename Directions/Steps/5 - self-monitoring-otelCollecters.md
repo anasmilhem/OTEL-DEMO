@@ -200,9 +200,3 @@ Once configured, you can view your collector metrics in Dynatrace:
 2. Search for "otelcol" to find collector-specific metrics
 3. Create dashboards to monitor collector health and performance
 
-## Best Practices
-1. Always enable metrics collection for production collectors
-2. Monitor both DaemonSet and Deployment collectors
-3. Set appropriate resource limits based on monitored usage
-4. Create alerts for critical metrics like failed exports or high memory usage
-5. Regularly review collector performance metrics to optimize configurations
