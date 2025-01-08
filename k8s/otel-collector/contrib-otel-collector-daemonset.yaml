@@ -103,8 +103,8 @@ spec:
           #      name: k8s.pod.ip
           - sources:
               - from: connection
-      resourcedetection/gcp:
-        detectors: [env, gcp]
+      resourcedetection/azure:
+        detectors: [env, azure]
         timeout: 2s
         override: false
       resource:
@@ -143,7 +143,7 @@ spec:
       pipelines:
         metrics:
           receivers: [kubeletstats]
-          processors: [k8sattributes, resourcedetection/gcp, resource, batch]
+          processors: [k8sattributes, resourcedetection/azure, resource, batch]
           exporters: [otlphttp/dynatrace, debug]
         metrics/prometheus:
           receivers: [prometheus]
