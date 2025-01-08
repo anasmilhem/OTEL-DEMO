@@ -1,11 +1,4 @@
-![image](https://github.com/user-attachments/assets/a7967a02-fc74-45b1-ba39-bc16488ab282)# OpenTelemetry Training Environment
-
 ## Getting Started
-
-### Local Development
-1. Click the "Code" button on this repository
-2. Select "Open with Codespaces"
-3. Click "New codespace"
 
 ### Azure Deployment
 1. Download the Azure setup script:
