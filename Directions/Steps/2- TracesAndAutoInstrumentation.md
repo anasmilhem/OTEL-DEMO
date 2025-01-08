@@ -223,7 +223,7 @@ helm install my-otel-demo open-telemetry/opentelemetry-demo \
     --create-namespace
 ```
 
-## Step 6: Apply the Complete Collecter Configuration
+## Apply the Complete Collecter Configuration
 
 If you've had any issues following along, you can apply the complete final configuration directly:
 
