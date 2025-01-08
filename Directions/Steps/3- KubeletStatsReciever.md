@@ -180,7 +180,7 @@ kubectl apply -f contrib-otel-collecter-dameonset-template.yaml
 ```
 
 
-## Step 4: Apply the Complete Collecter Configuration
+## Apply the Complete Collecter Configuration
 
 If you've had any issues following along, you can apply the complete final configuration directly:
 
