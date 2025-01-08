@@ -290,4 +290,12 @@ You can run both types of collectors in your cluster:
 - DaemonSet collectors for node-specific metrics (like kubeletstats)
 - Deployment collectors for cluster-wide monitoring (like k8s_objects and k8s_cluster)
 
-This separation of concerns allows for better resource utilization and more focused monitoring responsibilities.
+
+## Apply the Complete Collecter Configuration
+
+If you've had any issues following along, you can apply the complete final configuration directly:
+
+```bash
+kubectl apply -f https://raw.githubusercontent.com/anasmilhem/OTEL-DEMO/main/k8s/otel-collector/contrib-otel-collector-deployment.yaml
+```
+
