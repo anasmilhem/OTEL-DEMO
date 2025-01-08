@@ -99,6 +99,12 @@ Key components explained:
 - `mode`: Pull mode is more efficient than watch mode
 - `collection_interval`: How often to collect object states
 
+## To test it make sure to generate events
+```bash
+kubectl scale deployment frontend -n custom-otel-app --replicas=1
+kubectl scale deployment frontend -n custom-otel-app --replicas=2
+```
+
 ## Step 2: K8s Cluster Metrics Receiver
 
 The k8s_cluster receiver collects cluster-level metrics. Add this to your receivers section:
