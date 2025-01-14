@@ -74,8 +74,8 @@ spec:
           - key: dynatrace.otel.collector
             value: dynatrace-events
             action: insert
-      resourcedetection/gcp:
-        detectors: [env, gcp]
+      resourcedetection/azure:
+        detectors: [env, azure]
         timeout: 2s
         override: false
       k8sattributes:
@@ -131,13 +131,13 @@ spec:
       pipelines:
         logs:
           receivers: [k8sobjects/events]
-          processors: [resourcedetection/gcp, resource, k8sattributes, batch]
+          processors: [resourcedetection/azure, resource, k8sattributes, batch]
           exporters: [otlphttp/dynatrace, debug]
         metrics:
           receivers: [k8s_cluster]
-          processors: [resourcedetection/gcp, resource, k8sattributes, batch]
+          processors: [resourcedetection/azure, resource, k8sattributes, batch]
           exporters: [otlphttp/dynatrace, debug]
         metrics/prometheus:
           receivers: [prometheus]
-          processors: [filter/histogram, cumulativetodelta, batch]
+          processors: [k8sattributes, resourcedetection/azure, resource, filter/histogram, cumulativetodelta, batch]
           exporters: [otlphttp/dynatrace]

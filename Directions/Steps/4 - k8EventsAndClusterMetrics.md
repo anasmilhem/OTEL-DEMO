@@ -99,6 +99,12 @@ Key components explained:
 - `mode`: Pull mode is more efficient than watch mode
 - `collection_interval`: How often to collect object states
 
+## To test it make sure to generate events
+```bash
+kubectl scale deployment frontend -n custom-otel-app --replicas=1
+kubectl scale deployment frontend -n custom-otel-app --replicas=2
+```
+
 ## Step 2: K8s Cluster Metrics Receiver
 
 The k8s_cluster receiver collects cluster-level metrics. Add this to your receivers section:
@@ -290,4 +296,12 @@ You can run both types of collectors in your cluster:
 - DaemonSet collectors for node-specific metrics (like kubeletstats)
 - Deployment collectors for cluster-wide monitoring (like k8s_objects and k8s_cluster)
 
-This separation of concerns allows for better resource utilization and more focused monitoring responsibilities.
+
+## Apply the Complete Collecter Configuration
+
+If you've had any issues following along, you can apply the complete final configuration directly:
+
+```bash
+kubectl apply -f https://raw.githubusercontent.com/anasmilhem/OTEL-DEMO/main/k8s/otel-collector/contrib-otel-collector-deployment.yaml
+```
+

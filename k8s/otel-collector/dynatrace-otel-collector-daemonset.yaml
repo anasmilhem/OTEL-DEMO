@@ -105,7 +105,8 @@ spec:
             output: extract_metadata_from_filepath
             timestamp:
               parse_from: attributes.time
-              layout: "%Y-%m-%dT%H:%M:%S.%LZ"
+              layout_type: gotime
+              layout: "2006-01-02T15:04:05.999999999Z07:00"
           # Parse Docker format
           - type: json_parser
             id: parser-docker
@@ -143,13 +144,18 @@ spec:
           - type: move
             from: attributes.uid
             to: resource["k8s.pod.uid"]
+          # Map to Dynatrace supported timestamp key
+          - type: move
+            from: attributes["time"]
+            to: attributes["timestamp"] # This maps to one of Dynatrace's supported keys
           # Remove unwanted attributes
           - type: remove
-            field: attributes.log # duplicate value of content/body
+            field: attributes["log"] # duplicate value of content/body
           - type: remove
-            field: attributes.logtag # always the same value
+            field: attributes["logtag"] # always the same value
           - type: remove
-            field: attributes.time # duplicate value of timestamp
+            field: attributes["time"]
+
 
     processors:
       cumulativetodelta: {}
@@ -180,8 +186,8 @@ spec:
           - key: dynatrace.otel.collector
             value: dynatrace-logs
             action: insert
-      resourcedetection/gcp:
-        detectors: [env, gcp]
+      resourcedetection/azure:
+        detectors: [env, azure]
         timeout: 2s
         override: false
       k8sattributes:
@@ -240,19 +246,19 @@ spec:
         logs/otlp:
           receivers: [otlp]
           processors:
-            [k8sattributes, resourcedetection/gcp, resource, attributes, batch]
+            [k8sattributes, resourcedetection/azure, resource, attributes, batch]
           exporters: [otlphttp/dynatrace, debug]
         traces:
           receivers: [otlp]
           processors:
-            [k8sattributes, resourcedetection/gcp, resource, attributes, batch]
+            [k8sattributes, resourcedetection/azure, resource, attributes, batch]
           exporters: [otlphttp/dynatrace]
         logs/filelog:
           receivers: [filelog]
           processors:
-            [k8sattributes, resourcedetection/gcp, resource, attributes, batch]
+            [k8sattributes, resourcedetection/azure, resource, attributes, batch]
           exporters: [otlphttp/dynatrace]
         metrics/prometheus:
           receivers: [prometheus]
-          processors: [filter/histogram, cumulativetodelta, batch]
+          processors: [k8sattributes, resourcedetection/azure, resource, attributes, filter/histogram, cumulativetodelta, batch]
           exporters: [otlphttp/dynatrace]

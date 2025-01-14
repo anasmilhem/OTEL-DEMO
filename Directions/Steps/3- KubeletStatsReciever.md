@@ -179,3 +179,12 @@ Apply the configuration:
 kubectl apply -f contrib-otel-collecter-dameonset-template.yaml
 ```
 
+
+## Apply the Complete Collecter Configuration
+
+If you've had any issues following along, you can apply the complete final configuration directly:
+
+```bash
+kubectl apply -f https://raw.githubusercontent.com/anasmilhem/OTEL-DEMO/main/k8s/otel-collector/contrib-otel-collector-daemonset.yaml
+```
+

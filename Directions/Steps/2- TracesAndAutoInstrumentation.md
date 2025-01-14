@@ -93,52 +93,6 @@ kubectl apply -f https://raw.githubusercontent.com/anasmilhem/OTEL-DEMO/main/k8s
    - Configures debug logging
    - Ensures trace context is included
 
-## Step 2: Enable Auto-Instrumentation via Namespace Annotation
-
-Add the auto-instrumentation annotation to your namespace:
-
-```yaml:k8s/namespace.yaml
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: custom-otel-app
-  annotations:
-    instrumentation.opentelemetry.io/inject-nodejs: "true"
-```
-
-### Method 1: Using kubectl apply after updating the namespace.yaml file
-```bash
-kubectl apply -f k8s/namespace.yaml
-```
-
-### Method 2: Using kubectl annotate (for existing namespace)
-```bash
-# Add annotation to existing namespace
-kubectl annotate namespace custom-otel-app instrumentation.opentelemetry.io/inject-nodejs="true"
-
-# If you need to update an existing annotation, add --overwrite
-kubectl annotate namespace custom-otel-app instrumentation.opentelemetry.io/inject-nodejs="true" --overwrite
-
-# To verify the annotation
-kubectl get namespace custom-otel-app -o yaml | grep -A 1 annotations
-```
-
-### How Auto-Instrumentation Works
-
-1. **Injection Process**:
-   - OpenTelemetry Operator watches for pods in annotated namespaces
-   - Automatically injects the instrumentation agent
-   - Modifies pod spec to include necessary environment variables
-
-2. **Agent Initialization**:
-   - Agent loads before application code
-   - Automatically instruments supported libraries
-   - Establishes connection to collector
-
-3. **Runtime Impact**:
-   - Minimal performance overhead
-   - No code changes required
-   - Automatic context propagation
 
 ## Step 3: Verifying the Setup
 
@@ -159,22 +113,6 @@ kubectl get pods -n custom-otel-app -o yaml | grep -i opentelemetry
 kubectl logs -n dynatrace deployment/dynatrace-logs-collector | grep "trace"
 ```
 
-## Best Practices
-
-1. **Sampling Strategy**:
-   - Start with 100% sampling in development
-   - Adjust based on traffic volume in production
-   - Consider using tail-based sampling
-
-2. **Resource Attribution**:
-   - Set service name via `OTEL_SERVICE_NAME`
-   - Add custom attributes for better filtering
-   - Use consistent naming conventions
-
-3. **Security Considerations**:
-   - Use secure endpoints in production
-   - Implement proper RBAC
-   - Monitor resource usage
 
 ## Troubleshooting
 
@@ -285,7 +223,7 @@ helm install my-otel-demo open-telemetry/opentelemetry-demo \
     --create-namespace
 ```
 
-## Step 6: Apply the Complete Collecter Configuration
+## Apply the Complete Collecter Configuration
 
 If you've had any issues following along, you can apply the complete final configuration directly:
 
