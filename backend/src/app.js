@@ -1,5 +1,3 @@
-// Initialize OpenTelemetry
-require('./instrumentation');
 const { logger } = require('./config/logger');
 const express = require('express');
 const cors = require('cors');

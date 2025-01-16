@@ -39,6 +39,8 @@ spec:
               value: "3000"
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
               value: "http://dynatrace-logs-collector.dynatrace:4318"
+            - name: OTEL_METRICS_EXPORTER
+              value: "otlp"
           readinessProbe:
             httpGet:
               path: /health

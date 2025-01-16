@@ -1,4 +1,4 @@
-name: Build and Deploy
+name: Build and Push Images
 
 on:
   push:
@@ -8,10 +8,9 @@ on:
 
 env:
   REGISTRY: "registry.digitalocean.com/otel-demo"
-  CLUSTER_NAME: "k8s-1-31-1-do-4-nyc1-1732046844928"
 
 jobs:
-  build-and-deploy:
+  build-and-push:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -33,78 +32,24 @@ jobs:
         run: |
           docker build -t ${{ env.REGISTRY }}/opentelemetry-demo-backend:${{ env.IMAGE_TAG }} .
           docker push ${{ env.REGISTRY }}/opentelemetry-demo-backend:${{ env.IMAGE_TAG }}
+          # Tag as latest for convenience
+          docker tag ${{ env.REGISTRY }}/opentelemetry-demo-backend:${{ env.IMAGE_TAG }} ${{ env.REGISTRY }}/opentelemetry-demo-backend:latest
+          docker push ${{ env.REGISTRY }}/opentelemetry-demo-backend:latest
 
       - name: Build frontend image
         working-directory: ./frontend
         run: |
           docker build -t ${{ env.REGISTRY }}/opentelemetry-demo-frontend:${{ env.IMAGE_TAG }} .
           docker push ${{ env.REGISTRY }}/opentelemetry-demo-frontend:${{ env.IMAGE_TAG }}
+          # Tag as latest for convenience
+          docker tag ${{ env.REGISTRY }}/opentelemetry-demo-frontend:${{ env.IMAGE_TAG }} ${{ env.REGISTRY }}/opentelemetry-demo-frontend:latest
+          docker push ${{ env.REGISTRY }}/opentelemetry-demo-frontend:latest
 
       - name: Build load-generator image
         working-directory: ./load-generator
         run: |
           docker build -t ${{ env.REGISTRY }}/opentelemetry-demo-load-generator:${{ env.IMAGE_TAG }} .
           docker push ${{ env.REGISTRY }}/opentelemetry-demo-load-generator:${{ env.IMAGE_TAG }}
-
-      - name: Update deployment files
-        run: |
-          sed -i "s|image: registry.digitalocean.com/otel-demo/opentelemetry-demo-backend:.*|image: ${{ env.REGISTRY }}/opentelemetry-demo-backend:${{ env.IMAGE_TAG }}|" k8s/backend/deployment.yaml
-          sed -i "s|image: registry.digitalocean.com/otel-demo/opentelemetry-demo-frontend:.*|image: ${{ env.REGISTRY }}/opentelemetry-demo-frontend:${{ env.IMAGE_TAG }}|" k8s/frontend/deployment.yaml
-          sed -i "s|image: registry.digitalocean.com/otel-demo/opentelemetry-demo-load-generator:.*|image: ${{ env.REGISTRY }}/opentelemetry-demo-load-generator:${{ env.IMAGE_TAG }}|" k8s/load-generator/deployment.yaml
-
-      - name: Save DigitalOcean kubeconfig
-        run: doctl kubernetes cluster kubeconfig save ${{ env.CLUSTER_NAME }}
-
-      - name: Setup Helm
-        uses: azure/setup-helm@v3
-        with:
-          version: 'latest'
-
-      - name: Add OpenTelemetry Helm repo and update demo
-        run: |
-          helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm-charts
-          helm repo update
-          helm upgrade my-otel-demo open-telemetry/opentelemetry-demo \
-            --version 0.32.8 \
-            --values k8s/otel-demo-app/collecter-values.yaml \
-            --namespace otel-demo \
-            --install \
-
-      - name: Deploy to DigitalOcean Kubernetes
-        run: |
-          # Create namespaces
-          kubectl apply -f k8s/namespace.yaml
-          kubectl apply -f k8s/do-registry.yaml
-          
-          # Deploy OTEL Collectors and RBAC
-          kubectl apply -f k8s/otel-collector/rbac.yaml
-          kubectl apply -f k8s/otel-collector/contrib-otel-collector-daemonset.yaml
-          kubectl apply -f k8s/otel-collector/dynatrace-otel-collector-daemonset.yaml
-          kubectl apply -f k8s/otel-collector/contrib-otel-collector-deployment.yaml
-          
-          # Deploy OpenTelemetry Instrumentation CR
-          kubectl apply -f k8s/otel-instrumentation/node.yaml -n custom-otel-app
-          
-          # Wait for OTEL collector and instrumentation to be ready
-          kubectl wait --for=condition=established crd/instrumentations.opentelemetry.io --timeout=60s
-          kubectl wait --for=condition=ready pod -l app.kubernetes.io/component=opentelemetry-collector -n dynatrace --timeout=120s
-          
-          # Deploy application components
-          kubectl apply -f k8s/database/mongodb.yaml
-          kubectl wait --for=condition=ready pod -l app=mongodb -n custom-otel-app --timeout=120s
-          kubectl apply -f k8s/backend/deployment.yaml -n custom-otel-app
-          kubectl apply -f k8s/frontend/deployment.yaml -n custom-otel-app
-          kubectl apply -f k8s/load-generator/deployment.yaml -n custom-otel-app
-
-      - name: Verify deployment
-        run: |
-          # Verify OTEL collector deployments
-          kubectl rollout status daemonset/dynatrace-logs-collector -n dynatrace
-          kubectl rollout status daemonset/contrib-otel-collector -n dynatrace
-          kubectl rollout status deployment/contrib-otel-collector -n dynatrace
-          # kubectl rollout status deployment/my-otel-demo -n otel-demo
-          
-          # Verify application deployments
-          kubectl rollout status deployment/backend -n custom-otel-app
-          kubectl rollout status deployment/frontend -n custom-otel-app
-          kubectl rollout status deployment/load-generator -n custom-otel-app
+          # Tag as latest for convenience
+          docker tag ${{ env.REGISTRY }}/opentelemetry-demo-load-generator:${{ env.IMAGE_TAG }} ${{ env.REGISTRY }}/opentelemetry-demo-load-generator:latest
+          docker push ${{ env.REGISTRY }}/opentelemetry-demo-load-generator:latest
