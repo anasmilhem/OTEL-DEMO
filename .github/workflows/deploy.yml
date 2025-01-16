@@ -16,6 +16,21 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Update package-lock.json
+        run: |
+          cd backend
+          rm -f package-lock.json
+          npm install
+          git config --global user.email "github-actions@github.com"
+          git config --global user.name "GitHub Actions"
+          git add package-lock.json
+          git commit -m "Update package-lock.json" || echo "No changes to commit"
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
