@@ -1,7 +1,5 @@
 const { OTLPMetricExporter } = require('@opentelemetry/exporter-metrics-otlp-proto');
 const { PeriodicExportingMetricReader, MeterProvider, AggregationTemporality } = require('@opentelemetry/sdk-metrics');
-const { Resource } = require('@opentelemetry/resources');
-const { SemanticResourceAttributes } = require('@opentelemetry/semantic-conventions');
 const { metrics } = require('@opentelemetry/api');
 
 
@@ -20,13 +18,9 @@ const metricReader = new PeriodicExportingMetricReader({
     exportIntervalMillis: 1000,
 });
 
-// Create and configure MeterProvider
-const meterProvider = new MeterProvider({
-    resource: new Resource({
-        [SemanticResourceAttributes.SERVICE_NAME]: 'demo-backend-service',
-        [SemanticResourceAttributes.SERVICE_VERSION]: '1.0.0',
-    }),
-});
+// Create and configure MeterProvider with minimal configuration
+// The collector will add the necessary resource attributes
+const meterProvider = new MeterProvider();
 
 // Add metric reader to MeterProvider
 meterProvider.addMetricReader(metricReader);
