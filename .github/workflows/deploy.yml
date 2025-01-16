@@ -16,6 +16,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
       - name: Install doctl
         uses: digitalocean/action-doctl@v2
         with:
@@ -27,29 +30,35 @@ jobs:
       - name: Set Image Tag
         run: echo "IMAGE_TAG=${GITHUB_SHA::7}" >> $GITHUB_ENV
 
-      - name: Build backend image
-        working-directory: ./backend
-        run: |
-          docker build -t ${{ env.REGISTRY }}/opentelemetry-demo-backend:${{ env.IMAGE_TAG }} .
-          docker push ${{ env.REGISTRY }}/opentelemetry-demo-backend:${{ env.IMAGE_TAG }}
-          # Tag as latest for convenience
-          docker tag ${{ env.REGISTRY }}/opentelemetry-demo-backend:${{ env.IMAGE_TAG }} ${{ env.REGISTRY }}/opentelemetry-demo-backend:latest
-          docker push ${{ env.REGISTRY }}/opentelemetry-demo-backend:latest
+      - name: Build and push backend image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./backend
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/opentelemetry-demo-backend:${{ env.IMAGE_TAG }}
+            ${{ env.REGISTRY }}/opentelemetry-demo-backend:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
-      - name: Build frontend image
-        working-directory: ./frontend
-        run: |
-          docker build -t ${{ env.REGISTRY }}/opentelemetry-demo-frontend:${{ env.IMAGE_TAG }} .
-          docker push ${{ env.REGISTRY }}/opentelemetry-demo-frontend:${{ env.IMAGE_TAG }}
-          # Tag as latest for convenience
-          docker tag ${{ env.REGISTRY }}/opentelemetry-demo-frontend:${{ env.IMAGE_TAG }} ${{ env.REGISTRY }}/opentelemetry-demo-frontend:latest
-          docker push ${{ env.REGISTRY }}/opentelemetry-demo-frontend:latest
+      - name: Build and push frontend image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./frontend
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/opentelemetry-demo-frontend:${{ env.IMAGE_TAG }}
+            ${{ env.REGISTRY }}/opentelemetry-demo-frontend:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
-      - name: Build load-generator image
-        working-directory: ./load-generator
-        run: |
-          docker build -t ${{ env.REGISTRY }}/opentelemetry-demo-load-generator:${{ env.IMAGE_TAG }} .
-          docker push ${{ env.REGISTRY }}/opentelemetry-demo-load-generator:${{ env.IMAGE_TAG }}
-          # Tag as latest for convenience
-          docker tag ${{ env.REGISTRY }}/opentelemetry-demo-load-generator:${{ env.IMAGE_TAG }} ${{ env.REGISTRY }}/opentelemetry-demo-load-generator:latest
-          docker push ${{ env.REGISTRY }}/opentelemetry-demo-load-generator:latest
+      - name: Build and push load-generator image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./load-generator
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/opentelemetry-demo-load-generator:${{ env.IMAGE_TAG }}
+            ${{ env.REGISTRY }}/opentelemetry-demo-load-generator:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
