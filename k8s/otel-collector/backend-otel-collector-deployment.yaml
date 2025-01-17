@@ -124,12 +124,12 @@ spec:
         metrics:
           level: "detailed"
       pipelines:
-        traces:
-            receivers: [otlp]
-            processors:
-              [k8sattributes, resourcedetection/azure, resource, attributes, batch]
-            exporters: [otlphttp/dynatrace]
+        # traces:
+        #     receivers: [otlp]
+        #     processors:
+        #       [k8sattributes, resourcedetection/azure, resource, attributes, batch]
+        #     exporters: [otlphttp/dynatrace]
         metrics:
-          receivers: [otlp, prometheus]
+          receivers: [otlp]
           processors: [k8sattributes, resourcedetection/azure, resource, attributes, filter/histogram, cumulativetodelta, batch]
           exporters: [otlphttp/dynatrace] 
