@@ -29,7 +29,12 @@ process.on('uncaughtException', (error) => {
 app.use((req, res, next) => {
     const start = Date.now();
 
-    // Increment API endpoint counter
+    // Log metric recording
+    console.log('Recording API hit metric', {
+        method: req.method,
+        route: req.path
+    });
+
     apiEndpointCounter.add(1, {
         method: req.method,
         route: req.path
@@ -43,6 +48,13 @@ app.use((req, res, next) => {
     // Track response time
     res.on('finish', () => {
         const duration = Date.now() - start;
+        console.log('Recording request duration metric', {
+            method: req.method,
+            route: req.path,
+            duration,
+            statusCode: res.statusCode
+        });
+
         httpRequestDuration.record(duration, {
             method: req.method,
             route: req.path,

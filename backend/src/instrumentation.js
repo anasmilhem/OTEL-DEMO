@@ -2,6 +2,7 @@ const { OTLPMetricExporter } = require('@opentelemetry/exporter-metrics-otlp-pro
 const { PeriodicExportingMetricReader, MeterProvider, AggregationTemporality } = require('@opentelemetry/sdk-metrics');
 const { metrics } = require('@opentelemetry/api');
 
+console.log('Initializing OpenTelemetry metrics...');
 
 const metricExporter = new OTLPMetricExporter({
     url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT,
@@ -11,6 +12,11 @@ const metricExporter = new OTLPMetricExporter({
     // temporalityPreference: AggregationTemporality.DELTA,
     protocol: 'http/protobuf',
 });
+
+console.log('Metric exporter configured with URL:', process.env.OTEL_EXPORTER_OTLP_ENDPOINT);
+
+// Add error handling
+
 
 // Create metric reader
 const metricReader = new PeriodicExportingMetricReader({
@@ -51,6 +57,7 @@ const apiEndpointCounter = meter.createCounter('otel.api.hits', {
     description: 'Number of hits per API endpoint (via OpenTelemetry)',
     unit: 'calls',
 });
+console.log('Created API endpoint counter metric');
 
 const errorCounter = meter.createCounter('otel.errors.count', {
     description: 'Number of errors occurred (via OpenTelemetry)',
