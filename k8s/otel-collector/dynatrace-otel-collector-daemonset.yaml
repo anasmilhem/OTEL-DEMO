@@ -4,7 +4,7 @@ metadata:
   name: dynatrace-logs
   namespace: dynatrace
 spec:
-  managementState: "managed"
+#  managementState: "managed"
   serviceAccount: collector
   envFrom:
     - secretRef:
