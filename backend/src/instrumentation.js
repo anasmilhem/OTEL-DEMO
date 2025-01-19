@@ -1,57 +1,50 @@
 console.log('=== STARTING CUSTOM METRICS INSTRUMENTATION ===');
 
-const { OTLPMetricExporter } = require('@opentelemetry/exporter-metrics-otlp-proto');
-const { PeriodicExportingMetricReader, MeterProvider } = require('@opentelemetry/sdk-metrics');
 const { metrics } = require('@opentelemetry/api');
+const { OTLPMetricExporter } = require('@opentelemetry/exporter-metrics-otlp-proto');
+const { MeterProvider, PeriodicExportingMetricReader } = require('@opentelemetry/sdk-metrics');
+const { Resource } = require('@opentelemetry/resources');
 
 console.log('=== IMPORTS COMPLETED ===');
 
-// Create the OTLP exporter regardless
+// Create the OTLP exporter with the Kubernetes service DNS name
 const metricExporter = new OTLPMetricExporter({
-    url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT,
+    url: 'http://backend-collector-collector.dynatrace.svc.cluster.local:4318/v1/metrics',
     headers: {
         'Content-Type': 'application/x-protobuf'
     },
-    protocol: 'http/protobuf',
+    protocol: 'http/protobuf'
 });
 
 console.log('=== METRIC EXPORTER CREATED ===');
-console.log('Metric exporter configured with URL:', process.env.OTEL_EXPORTER_OTLP_ENDPOINT);
+console.log('Metric exporter configured with URL:', 'http://backend-collector-collector.dynatrace.svc.cluster.local:4318/v1/metrics');
 
-// Create metric reader
+// Create the metric reader
 const metricReader = new PeriodicExportingMetricReader({
     exporter: metricExporter,
-    exportIntervalMillis: 1000,
+    exportIntervalMillis: 1000, // How often to export metrics
 });
 
-// Check if a meter provider is already registered
-const existingProvider = metrics.getMeterProvider();
-let meterProvider;
+// Create and register MeterProvider
+const meterProvider = new MeterProvider({
+    resource: Resource.default().merge(
+        new Resource({
+            'service.name': 'backend',
+            'service.version': '1.0.0',
+            'deployment.environment': process.env.NODE_ENV || 'development'
+        })
+    )
+});
 
-if (existingProvider._version) {  // Check if it's a real provider and not the NoopMeterProvider
-    console.log('=== USING EXISTING METER PROVIDER ===');
-    meterProvider = existingProvider;
-    
-    // Add our OTLP exporter to the existing provider
-    if (meterProvider.addMetricReader) {
-        console.log('=== ADDING OTLP EXPORTER TO EXISTING PROVIDER ===');
-        meterProvider.addMetricReader(metricReader);
-    } else {
-        console.warn('=== WARNING: Cannot add metric reader to existing provider ===');
-    }
-} else {
-    console.log('=== CREATING NEW METER PROVIDER ===');
-    meterProvider = new MeterProvider();
-    meterProvider.addMetricReader(metricReader);
-    metrics.setGlobalMeterProvider(meterProvider);
-}
+// Add the metric reader to the provider
+meterProvider.addMetricReader(metricReader);
 
-console.log('=== METER PROVIDER CONFIGURED ===');
+// Set as global meter provider
+metrics.setGlobalMeterProvider(meterProvider);
 
 // Get a meter instance
-const meter = metrics.getMeter('otel.demo.backend');
-
-console.log('=== CREATING METRICS ===');
+const meter = metrics.getMeter('backend-service', '1.0.0');
+console.log('=== METER CREATED ===');
 
 // Create metrics
 const activeUsers = meter.createUpDownCounter('otel.users.active', {
@@ -59,9 +52,9 @@ const activeUsers = meter.createUpDownCounter('otel.users.active', {
     unit: 'users',
 });
 
-const httpRequestDuration = meter.createHistogram('otel.http.duration', {
-    description: 'Duration of HTTP requests',
-    unit: 'ms',
+const httpRequestDuration = meter.createHistogram('otel.http.server.request.duration', {
+    description: 'Duration of HTTP server requests',
+    unit: 's'
 });
 
 const dbOperationDuration = meter.createHistogram('otel.db.duration', {
