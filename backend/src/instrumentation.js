@@ -7,7 +7,7 @@ const { Resource } = require('@opentelemetry/resources');
 
 console.log('=== IMPORTS COMPLETED ===');
 
-// Create the OTLP exporter with the Kubernetes service DNS name
+// Create the OTLP exporter regardless of existing provider
 const metricExporter = new OTLPMetricExporter({
     url: 'http://backend-collector-collector.dynatrace.svc.cluster.local:4318/v1/metrics',
     headers: {
@@ -22,39 +22,63 @@ console.log('Metric exporter configured with URL:', 'http://backend-collector-co
 // Create the metric reader
 const metricReader = new PeriodicExportingMetricReader({
     exporter: metricExporter,
-    exportIntervalMillis: 1000, // How often to export metrics
+    exportIntervalMillis: 1000,
 });
 
-// Create and register MeterProvider
-const meterProvider = new MeterProvider({
-    resource: Resource.default().merge(
-        new Resource({
+// Check if we already have a meter provider (from Dynatrace)
+const existingProvider = metrics.getMeterProvider();
+
+console.log('=== EXISTING PROVIDER ===');
+console.log(existingProvider);
+console.log('=== EXISTING PROVIDER END ===');
+
+let meter;
+
+if (existingProvider._version) {
+    console.log('=== USING EXISTING METER PROVIDER ===');
+    // Try to add our OTLP exporter to the existing provider
+    if (existingProvider.addMetricReader) {
+        console.log('=== ADDING OTLP EXPORTER TO EXISTING PROVIDER ===');
+        try {
+            existingProvider.addMetricReader(metricReader);
+            console.log('Successfully added OTLP exporter to existing provider');
+        } catch (error) {
+            console.warn('Failed to add OTLP exporter to existing provider:', error);
+        }
+    } else {
+        console.warn('=== WARNING: Cannot add metric reader to existing provider ===');
+    }
+    meter = metrics.getMeter('backend-service', '1.0.0');
+} else {
+    console.log('=== CREATING NEW METER PROVIDER ===');
+    
+    // Create and register MeterProvider
+    const meterProvider = new MeterProvider({
+        resource: new Resource({
             'service.name': 'backend',
             'service.version': '1.0.0',
             'deployment.environment': process.env.NODE_ENV || 'development'
         })
-    )
-});
+    });
 
-// Add the metric reader to the provider
-meterProvider.addMetricReader(metricReader);
+    // Add the metric reader to the provider
+    meterProvider.addMetricReader(metricReader);
+    metrics.setGlobalMeterProvider(meterProvider);
+    
+    meter = metrics.getMeter('backend-service', '1.0.0');
+}
 
-// Set as global meter provider
-metrics.setGlobalMeterProvider(meterProvider);
-
-// Get a meter instance
-const meter = metrics.getMeter('backend-service', '1.0.0');
 console.log('=== METER CREATED ===');
 
-// Create metrics
+// Create metrics with original names
 const activeUsers = meter.createUpDownCounter('otel.users.active', {
     description: 'Number of active users in the system',
     unit: 'users',
 });
 
-const httpRequestDuration = meter.createHistogram('otel.http.server.request.duration', {
-    description: 'Duration of HTTP server requests',
-    unit: 's'
+const httpRequestDuration = meter.createHistogram('otel.http.duration', {
+    description: 'Duration of HTTP requests',
+    unit: 'ms',
 });
 
 const dbOperationDuration = meter.createHistogram('otel.db.duration', {
