@@ -17,15 +17,6 @@ const metricExporter = new OTLPMetricExporter({
 console.log('=== METRIC EXPORTER CREATED ===');
 console.log('Metric exporter configured with URL:', process.env.OTEL_EXPORTER_OTLP_ENDPOINT);
 
-// Add error handling
-metricExporter.on('error', (error) => {
-    console.error('=== METRIC EXPORT ERROR ===', error);
-});
-
-metricExporter.on('success', () => {
-    console.log('=== METRICS EXPORTED SUCCESSFULLY ===');
-});
-
 // Create metric reader
 const metricReader = new PeriodicExportingMetricReader({
     exporter: metricExporter,
@@ -39,40 +30,43 @@ const meterProvider = new MeterProvider();
 // Add metric reader to MeterProvider
 meterProvider.addMetricReader(metricReader);
 
+console.log('=== METER PROVIDER CONFIGURED ===');
+
 // Set global meter provider
 metrics.setGlobalMeterProvider(meterProvider);
 
-// Get a meter instance with a proper namespace
+// Get a meter instance
 const meter = metrics.getMeter('otel.demo.backend');
 
-// Create metrics following Dynatrace naming conventions and limits
+console.log('=== CREATING METRICS ===');
+
+// Create metrics
 const activeUsers = meter.createUpDownCounter('otel.users.active', {
-    description: 'Number of active users in the system (via OpenTelemetry)',
+    description: 'Number of active users in the system',
     unit: 'users',
 });
 
 const httpRequestDuration = meter.createHistogram('otel.http.duration', {
-    description: 'Duration of HTTP requests (via OpenTelemetry)',
+    description: 'Duration of HTTP requests',
     unit: 'ms',
 });
 
 const dbOperationDuration = meter.createHistogram('otel.db.duration', {
-    description: 'Duration of database operations (via OpenTelemetry)',
+    description: 'Duration of database operations',
     unit: 'ms',
 });
 
 const apiEndpointCounter = meter.createCounter('otel.api.hits', {
-    description: 'Number of hits per API endpoint (via OpenTelemetry)',
+    description: 'Number of hits per API endpoint',
     unit: 'calls',
 });
-console.log('Created API endpoint counter metric');
 
 const errorCounter = meter.createCounter('otel.errors.count', {
-    description: 'Number of errors occurred (via OpenTelemetry)',
+    description: 'Number of errors occurred',
     unit: 'errors',
 });
 
-// Record a test metric immediately
+// Record a test metric
 console.log('=== RECORDING TEST METRIC ===');
 apiEndpointCounter.add(1, {
     method: 'STARTUP',
