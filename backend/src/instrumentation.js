@@ -1,22 +1,30 @@
+console.log('=== STARTING CUSTOM METRICS INSTRUMENTATION ===');
+
 const { OTLPMetricExporter } = require('@opentelemetry/exporter-metrics-otlp-proto');
 const { PeriodicExportingMetricReader, MeterProvider, AggregationTemporality } = require('@opentelemetry/sdk-metrics');
 const { metrics } = require('@opentelemetry/api');
 
-console.log('Initializing OpenTelemetry metrics...');
+console.log('=== IMPORTS COMPLETED ===');
 
 const metricExporter = new OTLPMetricExporter({
     url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT,
     headers: {
         'Content-Type': 'application/x-protobuf'
     },
-    // temporalityPreference: AggregationTemporality.DELTA,
     protocol: 'http/protobuf',
 });
 
+console.log('=== METRIC EXPORTER CREATED ===');
 console.log('Metric exporter configured with URL:', process.env.OTEL_EXPORTER_OTLP_ENDPOINT);
 
 // Add error handling
+metricExporter.on('error', (error) => {
+    console.error('=== METRIC EXPORT ERROR ===', error);
+});
 
+metricExporter.on('success', () => {
+    console.log('=== METRICS EXPORTED SUCCESSFULLY ===');
+});
 
 // Create metric reader
 const metricReader = new PeriodicExportingMetricReader({
@@ -64,6 +72,13 @@ const errorCounter = meter.createCounter('otel.errors.count', {
     unit: 'errors',
 });
 
+// Record a test metric immediately
+console.log('=== RECORDING TEST METRIC ===');
+apiEndpointCounter.add(1, {
+    method: 'STARTUP',
+    route: '/test'
+});
+console.log('=== TEST METRIC RECORDED ===');
 
 module.exports = {
     activeUsers,
