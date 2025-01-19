@@ -34,10 +34,11 @@ console.log('=== EXISTING PROVIDER END ===');
 
 let meter;
 
-if (existingProvider._version) {
+// Better check for existing provider
+if (existingProvider && existingProvider._sharedState) {
     console.log('=== USING EXISTING METER PROVIDER ===');
     // Try to add our OTLP exporter to the existing provider
-    if (existingProvider.addMetricReader) {
+    if (typeof existingProvider.addMetricReader === 'function') {
         console.log('=== ADDING OTLP EXPORTER TO EXISTING PROVIDER ===');
         try {
             existingProvider.addMetricReader(metricReader);
@@ -50,22 +51,8 @@ if (existingProvider._version) {
     }
     meter = metrics.getMeter('backend-service', '1.0.0');
 } else {
-    console.log('=== CREATING NEW METER PROVIDER ===');
-    
-    // Create and register MeterProvider
-    const meterProvider = new MeterProvider({
-        resource: new Resource({
-            'service.name': 'backend',
-            'service.version': '1.0.0',
-            'deployment.environment': process.env.NODE_ENV || 'development'
-        })
-    });
-
-    // Add the metric reader to the provider
-    meterProvider.addMetricReader(metricReader);
-    metrics.setGlobalMeterProvider(meterProvider);
-    
-    meter = metrics.getMeter('backend-service', '1.0.0');
+    console.log('=== NO EXISTING PROVIDER FOUND ===');
+    throw new Error('Expected to find an existing meter provider from Dynatrace');
 }
 
 console.log('=== METER CREATED ===');
