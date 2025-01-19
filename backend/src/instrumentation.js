@@ -1,11 +1,12 @@
 console.log('=== STARTING CUSTOM METRICS INSTRUMENTATION ===');
 
 const { OTLPMetricExporter } = require('@opentelemetry/exporter-metrics-otlp-proto');
-const { PeriodicExportingMetricReader, MeterProvider, AggregationTemporality } = require('@opentelemetry/sdk-metrics');
+const { PeriodicExportingMetricReader, MeterProvider } = require('@opentelemetry/sdk-metrics');
 const { metrics } = require('@opentelemetry/api');
 
 console.log('=== IMPORTS COMPLETED ===');
 
+// Create the OTLP exporter regardless
 const metricExporter = new OTLPMetricExporter({
     url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT,
     headers: {
@@ -23,17 +24,29 @@ const metricReader = new PeriodicExportingMetricReader({
     exportIntervalMillis: 1000,
 });
 
-// Create and configure MeterProvider with minimal configuration
-// The collector will add the necessary resource attributes
-const meterProvider = new MeterProvider();
+// Check if a meter provider is already registered
+const existingProvider = metrics.getMeterProvider();
+let meterProvider;
 
-// Add metric reader to MeterProvider
-meterProvider.addMetricReader(metricReader);
+if (existingProvider._version) {  // Check if it's a real provider and not the NoopMeterProvider
+    console.log('=== USING EXISTING METER PROVIDER ===');
+    meterProvider = existingProvider;
+    
+    // Add our OTLP exporter to the existing provider
+    if (meterProvider.addMetricReader) {
+        console.log('=== ADDING OTLP EXPORTER TO EXISTING PROVIDER ===');
+        meterProvider.addMetricReader(metricReader);
+    } else {
+        console.warn('=== WARNING: Cannot add metric reader to existing provider ===');
+    }
+} else {
+    console.log('=== CREATING NEW METER PROVIDER ===');
+    meterProvider = new MeterProvider();
+    meterProvider.addMetricReader(metricReader);
+    metrics.setGlobalMeterProvider(meterProvider);
+}
 
 console.log('=== METER PROVIDER CONFIGURED ===');
-
-// Set global meter provider
-metrics.setGlobalMeterProvider(meterProvider);
 
 // Get a meter instance
 const meter = metrics.getMeter('otel.demo.backend');
