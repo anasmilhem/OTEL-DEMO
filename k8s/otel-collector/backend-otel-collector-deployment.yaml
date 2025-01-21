@@ -131,5 +131,5 @@ spec:
         #     exporters: [otlphttp/dynatrace]
         metrics:
           receivers: [otlp]
-          processors: [k8sattributes, resourcedetection/azure, resource, attributes, filter/histogram, cumulativetodelta, batch]
+          processors: [k8sattributes, resourcedetection/azure, resource, attributes, cumulativetodelta, batch]
           exporters: [otlphttp/dynatrace] 
