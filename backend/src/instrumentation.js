@@ -9,7 +9,7 @@ console.log('=== IMPORTS COMPLETED ===');
 
 // Create the OTLP exporter regardless of existing provider
 const metricExporter = new OTLPMetricExporter({
-    url: 'http://backend-collector-collector.dynatrace.svc.cluster.local:4318/v1/metrics',
+    url: process.env.OTEL_METRIC_COLLECTOR_ENDPOINT || 'http://backend-collector-collector.dynatrace.svc.cluster.local:4318/v1/metrics',
     headers: {
         'Content-Type': 'application/x-protobuf'
     },
@@ -17,7 +17,7 @@ const metricExporter = new OTLPMetricExporter({
 });
 
 console.log('=== METRIC EXPORTER CREATED ===');
-console.log('Metric exporter configured with URL:', 'http://backend-collector-collector.dynatrace.svc.cluster.local:4318/v1/metrics');
+console.log('Metric exporter configured with URL:', process.env.OTEL_METRIC_COLLECTOR_ENDPOINT || 'http://backend-collector-collector.dynatrace.svc.cluster.local:4318/v1/metrics');
 
 // Create the metric reader
 const metricReader = new PeriodicExportingMetricReader({
@@ -51,8 +51,21 @@ if (existingProvider && existingProvider._sharedState) {
     }
     meter = metrics.getMeter('backend-service', '1.0.0');
 } else {
-    console.log('=== NO EXISTING PROVIDER FOUND ===');
-    throw new Error('Expected to find an existing meter provider from Dynatrace');
+    console.log('=== NO EXISTING PROVIDER FOUND, CREATING NEW PROVIDER ===');
+    // Create a new meter provider
+    const meterProvider = new MeterProvider({
+        resource: new Resource({
+            'service.name': 'backend-service',
+            'service.version': '1.0.0'
+        }),
+    });
+    
+    // Add the metric reader to the provider
+    meterProvider.addMetricReader(metricReader);
+    
+    // Set the global meter provider
+    metrics.setGlobalMeterProvider(meterProvider);
+    meter = metrics.getMeter('backend-service', '1.0.0');
 }
 
 console.log('=== METER CREATED ===');

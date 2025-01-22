@@ -41,6 +41,8 @@ spec:
               value: "http://backend-collector-collector.dynatrace.svc.cluster.local:4318"
             - name: OTEL_METRICS_EXPORTER
               value: "otlp"
+            - name: OTEL_METRIC_COLLECTOR_ENDPOINT
+              value: "http://backend-collector-collector.dynatrace.svc.cluster.local:4318/v1/metrics"
           readinessProbe:
             httpGet:
               path: /health
