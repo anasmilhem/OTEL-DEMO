@@ -1,0 +1,43 @@
+{
+    "family": "load-generator",
+    "taskRoleArn": "arn:aws:iam::${AWS_ACCOUNT_ID}:role/ecsTaskRole",
+    "executionRoleArn": "arn:aws:iam::${AWS_ACCOUNT_ID}:role/ecsTaskExecutionRole",
+    "containerDefinitions": [
+        {
+            "name": "load-generator",
+            "image": "${ECR_REGISTRY}/load-generator:latest",
+            "essential": true,
+            "environment": [
+                {
+                    "name": "TARGET_URL",
+                    "value": "http://backend-service.${AWS_REGION}.internal:3000"
+                },
+                {
+                    "name": "USERS",
+                    "value": "10"
+                },
+                {
+                    "name": "DURATION",
+                    "value": "5"
+                },
+                {
+                    "name": "NODE_ENV",
+                    "value": "production"
+                }
+            ],
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/ecs/load-generator",
+                    "awslogs-region": "${AWS_REGION}",
+                    "awslogs-stream-prefix": "load-generator",
+                    "awslogs-create-group": "true"
+                }
+            }
+        }
+    ],
+    "requiresCompatibilities": ["FARGATE"],
+    "networkMode": "awsvpc",
+    "cpu": "256",
+    "memory": "512"
+} 

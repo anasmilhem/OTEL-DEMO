@@ -1,0 +1,67 @@
+{
+    "family": "backend-service",
+    "taskRoleArn": "arn:aws:iam::${AWS_ACCOUNT_ID}:role/ecsTaskRole",
+    "executionRoleArn": "arn:aws:iam::${AWS_ACCOUNT_ID}:role/ecsTaskExecutionRole",
+    "containerDefinitions": [
+        {
+            "name": "backend",
+            "image": "${ECR_REGISTRY}/backend-service:latest",
+            "essential": true,
+            "portMappings": [
+                {
+                    "containerPort": 3000,
+                    "protocol": "tcp"
+                }
+            ],
+            "environment": [
+                {
+                    "name": "NODE_ENV",
+                    "value": "production"
+                },
+                {
+                    "name": "NODE_OPTIONS",
+                    "value": "--require @opentelemetry/auto-instrumentations-node/register"
+                },
+                {
+                    "name": "OTEL_SERVICE_NAME",
+                    "value": "backend-service"
+                },
+                {
+                    "name": "OTEL_TRACES_EXPORTER",
+                    "value": "otlp"
+                },
+                {
+                    "name": "OTEL_METRICS_EXPORTER",
+                    "value": "none"
+                },
+                {
+                    "name": "OTEL_EXPORTER_OTLP_ENDPOINT",
+                    "value": "https://${DT_TENANT_ID}.live.dynatrace.com/api/v2/otlp"
+                },
+                {
+                    "name": "OTEL_RESOURCE_ATTRIBUTES",
+                    "value": "service.name=backend-service,deployment.environment=production"
+                }
+            ],
+            "secrets": [
+                {
+                    "name": "OTEL_EXPORTER_OTLP_HEADERS",
+                    "valueFrom": "arn:aws:secretsmanager:${AWS_REGION}:${AWS_ACCOUNT_ID}:secret:dynatrace-api-token"
+                }
+            ],
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/ecs/backend-service",
+                    "awslogs-region": "${AWS_REGION}",
+                    "awslogs-stream-prefix": "backend",
+                    "awslogs-create-group": "true"
+                }
+            }
+        }
+    ],
+    "requiresCompatibilities": ["FARGATE"],
+    "networkMode": "awsvpc",
+    "cpu": "256",
+    "memory": "512"
+} 
