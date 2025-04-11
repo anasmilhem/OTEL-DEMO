@@ -65,17 +65,10 @@ spec:
           - /var/log/pods/*/*/*.log
         exclude:
           - /var/log/pods/*/otc-container/*.log
-          # - /var/log/pods/custom-otel-app_*/*/*.log
         start_at: beginning
         include_file_path: true
         include_file_name: false
         operators:
-          # Add timestamp parsing at the start
-          # - type: time_parser
-          #   parse_from: attributes.time
-          #   layout: "%Y-%m-%dT%H:%M:%S.%LZ"
-          #   layout_type: strptime
-
           - type: router
             id: get-format
             routes:
@@ -144,11 +137,7 @@ spec:
           - type: move
             from: attributes.uid
             to: resource["k8s.pod.uid"]
-          # Map to Dynatrace supported timestamp key
-          - type: move
-            from: attributes["time"]
-            to: attributes["timestamp"] # This maps to one of Dynatrace's supported keys
-          # Remove unwanted attributes
+     
           - type: remove
             field: attributes["log"] # duplicate value of content/body
           - type: remove
@@ -173,7 +162,10 @@ spec:
           - key: k8s.pod.ip
             action: delete
           - key: k8s.cluster.name
-            value: anas-otel
+            value: aks-demo-otel
+            action: insert
+          - key: k8s.workload.name
+            from_attribute: k8s.deployment.name
             action: insert
           - key: dt.security_context
             from_attribute: k8s.cluster.name

@@ -22,4 +22,4 @@ spec:
       - name: OTEL_NODE_INCLUDE_TRACE_CONTEXT
         value: "true"
       - name: OTEL_LOG_LEVEL
-        value: "debug"
+        value: "info"

@@ -30,9 +30,10 @@ app.use((req, res, next) => {
     const start = Date.now();
 
     // Log metric recording
-    console.log('Recording API hit metric', {
+    logger.info('API hit metric recorded', {
         method: req.method,
-        route: req.path
+        route: req.path,
+        metric_type: 'api_hit'
     });
 
     apiEndpointCounter.add(1, {
@@ -48,11 +49,12 @@ app.use((req, res, next) => {
     // Track response time
     res.on('finish', () => {
         const duration = Date.now() - start;
-        console.log('Recording request duration metric', {
+        logger.info('Request duration metric recorded', {
             method: req.method,
             route: req.path,
             duration,
-            statusCode: res.statusCode
+            statusCode: res.statusCode,
+            metric_type: 'request_duration'
         });
 
         httpRequestDuration.record(duration, {
