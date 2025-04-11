@@ -37,8 +37,6 @@ spec:
               value: "production"
             - name: PORT
               value: "3000"
-            - name: OTEL_EXPORTER_OTLP_ENDPOINT
-              value: "http://backend-collector-collector.dynatrace.svc.cluster.local:4318"
             - name: OTEL_METRICS_EXPORTER
               value: "otlp"
             - name: OTEL_METRIC_COLLECTOR_ENDPOINT
