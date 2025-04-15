@@ -856,18 +856,20 @@ This pattern (`telemetry-type/name`) allows you to:
 - Apply different processing rules to different sources
 
 
-## Apply the Complete Collecter Configuration
-
-If you've had any issues following along, you can apply the complete final configuration directly:
-
-```bash
-kubectl apply -f https://raw.githubusercontent.com/anasmilhem/OTEL-DEMO/main/k8s/otel-collector/dynatrace-otel-collector-daemonset.yaml
-```
-
-
-
 Common use cases include:
 - Separating application logs from infrastructure logs
 - Applying different processing rules to different log sources
 - Sending different types of logs to different destinations
 - Having different batching configurations for different sources
+
+
+
+## Apply the Complete Collecter Configuration
+
+If you've had any issues following along, you can apply the complete final configuration directly:
+
+```bash
+kubectl apply -f https://raw.githubusercontent.com/anasmilhem/OTEL-DEMO/main/k8s/otel-collector/dynatrace-otel-collector-daemonset-logs.yaml
+```
+
+
