@@ -13,8 +13,8 @@ spec:
     argument: "1" # Sample 100% of traces
   nodejs:
     env:
-      - name: OTEL_NODE_ENABLED_INSTRUMENTATIONS
-        value: http,express,mongodb,winston,mongoose
+      # - name: OTEL_NODE_ENABLED_INSTRUMENTATIONS
+      #   value: http,express,mongodb,winston,mongoose
       - name: OTEL_EXPORTER_OTLP_PROTOCOL
         value: "http/protobuf"
       - name: OTEL_EXPORTER_OTLP_ENDPOINT
